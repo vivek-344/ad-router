@@ -53,10 +53,10 @@ CREATE INDEX ON "target_country" ("cid");
 
 CREATE INDEX ON "campaign_status_history" ("cid");
 
-ALTER TABLE "target_app" ADD FOREIGN KEY ("cid") REFERENCES "campaign" ("cid");
+ALTER TABLE "target_app" ADD FOREIGN KEY ("cid") REFERENCES "campaign" ("cid") ON DELETE CASCADE;
 
-ALTER TABLE "target_os" ADD FOREIGN KEY ("cid") REFERENCES "campaign" ("cid");
+ALTER TABLE "target_os" ADD FOREIGN KEY ("cid") REFERENCES "campaign" ("cid") ON DELETE CASCADE;
 
-ALTER TABLE "target_country" ADD FOREIGN KEY ("cid") REFERENCES "campaign" ("cid");
+ALTER TABLE "target_country" ADD FOREIGN KEY ("cid") REFERENCES "campaign" ("cid") ON DELETE CASCADE;
 
-ALTER TABLE "campaign_status_history" ADD FOREIGN KEY ("cid") REFERENCES "campaign" ("cid");
+ALTER TABLE "campaign_status_history" ADD FOREIGN KEY ("cid") REFERENCES "campaign" ("cid") ON DELETE CASCADE;
