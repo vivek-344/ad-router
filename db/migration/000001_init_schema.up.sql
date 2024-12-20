@@ -12,7 +12,7 @@ CREATE TABLE "campaign" (
   "cid" text PRIMARY KEY NOT NULL,
   "img" text NOT NULL,
   "cta" text NOT NULL,
-  "status" status_type NOT NULL,
+  "status" status_type NOT NULL DEFAULT 'active',
   "created_at" timestamp NOT NULL DEFAULT (now())
 );
 
@@ -43,11 +43,15 @@ CREATE TABLE "target_country" (
   "rule" rule_type NOT NULL
 );
 
+CREATE INDEX ON "campaign" ("status");
+
 CREATE INDEX ON "target_app" ("cid");
 
 CREATE INDEX ON "target_os" ("cid");
 
 CREATE INDEX ON "target_country" ("cid");
+
+CREATE INDEX ON "campaign_status_history" ("cid");
 
 ALTER TABLE "target_app" ADD FOREIGN KEY ("cid") REFERENCES "campaign" ("cid");
 
