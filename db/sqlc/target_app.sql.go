@@ -56,20 +56,20 @@ func (q *Queries) GetTargetApp(ctx context.Context, cid string) (TargetApp, erro
 	return i, err
 }
 
-const updateTargetApp = `-- name: UpdateTargetApp :one
+const updateTargetApp = `-- name: updateTargetApp :one
 UPDATE target_app
 SET app_id = $2, rule = $3
 WHERE cid = $1
 RETURNING cid, app_id, rule
 `
 
-type UpdateTargetAppParams struct {
+type updateTargetAppParams struct {
 	Cid   string   `json:"cid"`
 	AppID string   `json:"app_id"`
 	Rule  RuleType `json:"rule"`
 }
 
-func (q *Queries) UpdateTargetApp(ctx context.Context, arg UpdateTargetAppParams) (TargetApp, error) {
+func (q *Queries) updateTargetApp(ctx context.Context, arg updateTargetAppParams) (TargetApp, error) {
 	row := q.db.QueryRow(ctx, updateTargetApp, arg.Cid, arg.AppID, arg.Rule)
 	var i TargetApp
 	err := row.Scan(&i.Cid, &i.AppID, &i.Rule)

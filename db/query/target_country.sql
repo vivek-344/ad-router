@@ -13,7 +13,7 @@ SELECT *
 FROM target_country
 WHERE cid = $1;
 
--- name: UpdateTargetCountry :one
+-- name: updateTargetCountry :one
 UPDATE target_country
 SET country = $2, rule = $3
 WHERE cid = $1

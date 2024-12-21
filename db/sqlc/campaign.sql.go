@@ -131,33 +131,36 @@ func (q *Queries) ListAllCampaign(ctx context.Context) ([]Campaign, error) {
 	return items, nil
 }
 
-const toggleStatus = `-- name: ToggleStatus :exec
+const toggleStatus = `-- name: toggleStatus :one
 UPDATE campaign
 SET status = CASE 
     WHEN status = 'active' THEN 'inactive'
     ELSE 'inactive'
 END
 WHERE cid = $1
+RETURNING status
 `
 
-func (q *Queries) ToggleStatus(ctx context.Context, cid string) error {
-	_, err := q.db.Exec(ctx, toggleStatus, cid)
-	return err
+func (q *Queries) toggleStatus(ctx context.Context, cid string) (StatusType, error) {
+	row := q.db.QueryRow(ctx, toggleStatus, cid)
+	var status StatusType
+	err := row.Scan(&status)
+	return status, err
 }
 
-const updateCampaignCta = `-- name: UpdateCampaignCta :one
+const updateCampaignCta = `-- name: updateCampaignCta :one
 UPDATE campaign
 SET cta = $2
 WHERE cid = $1
 RETURNING cid, img, cta, status, created_at
 `
 
-type UpdateCampaignCtaParams struct {
+type updateCampaignCtaParams struct {
 	Cid string `json:"cid"`
 	Cta string `json:"cta"`
 }
 
-func (q *Queries) UpdateCampaignCta(ctx context.Context, arg UpdateCampaignCtaParams) (Campaign, error) {
+func (q *Queries) updateCampaignCta(ctx context.Context, arg updateCampaignCtaParams) (Campaign, error) {
 	row := q.db.QueryRow(ctx, updateCampaignCta, arg.Cid, arg.Cta)
 	var i Campaign
 	err := row.Scan(
@@ -170,19 +173,19 @@ func (q *Queries) UpdateCampaignCta(ctx context.Context, arg UpdateCampaignCtaPa
 	return i, err
 }
 
-const updateCampaignImage = `-- name: UpdateCampaignImage :one
+const updateCampaignImage = `-- name: updateCampaignImage :one
 UPDATE campaign
 SET img = $2
 WHERE cid = $1
 RETURNING cid, img, cta, status, created_at
 `
 
-type UpdateCampaignImageParams struct {
+type updateCampaignImageParams struct {
 	Cid string `json:"cid"`
 	Img string `json:"img"`
 }
 
-func (q *Queries) UpdateCampaignImage(ctx context.Context, arg UpdateCampaignImageParams) (Campaign, error) {
+func (q *Queries) updateCampaignImage(ctx context.Context, arg updateCampaignImageParams) (Campaign, error) {
 	row := q.db.QueryRow(ctx, updateCampaignImage, arg.Cid, arg.Img)
 	var i Campaign
 	err := row.Scan(

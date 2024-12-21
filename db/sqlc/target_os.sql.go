@@ -56,20 +56,20 @@ func (q *Queries) GetTargetOs(ctx context.Context, cid string) (TargetO, error) 
 	return i, err
 }
 
-const updateTargetOs = `-- name: UpdateTargetOs :one
+const updateTargetOs = `-- name: updateTargetOs :one
 UPDATE target_os
 SET os = $2, rule = $3
 WHERE cid = $1
 RETURNING cid, os, rule
 `
 
-type UpdateTargetOsParams struct {
+type updateTargetOsParams struct {
 	Cid  string   `json:"cid"`
 	Os   string   `json:"os"`
 	Rule RuleType `json:"rule"`
 }
 
-func (q *Queries) UpdateTargetOs(ctx context.Context, arg UpdateTargetOsParams) (TargetO, error) {
+func (q *Queries) updateTargetOs(ctx context.Context, arg updateTargetOsParams) (TargetO, error) {
 	row := q.db.QueryRow(ctx, updateTargetOs, arg.Cid, arg.Os, arg.Rule)
 	var i TargetO
 	err := row.Scan(&i.Cid, &i.Os, &i.Rule)

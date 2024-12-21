@@ -13,7 +13,7 @@ SELECT *
 FROM target_os
 WHERE cid = $1;
 
--- name: UpdateTargetOs :one
+-- name: updateTargetOs :one
 UPDATE target_os
 SET os = $2, rule = $3
 WHERE cid = $1

@@ -22,21 +22,22 @@ SELECT *
 FROM campaign
 WHERE status = 'active';
 
--- name: ToggleStatus :exec
+-- name: toggleStatus :one
 UPDATE campaign
 SET status = CASE 
     WHEN status = 'active' THEN 'inactive'
     ELSE 'inactive'
 END
-WHERE cid = $1;
+WHERE cid = $1
+RETURNING status;
 
--- name: UpdateCampaignImage :one
+-- name: updateCampaignImage :one
 UPDATE campaign
 SET img = $2
 WHERE cid = $1
 RETURNING *;
 
--- name: UpdateCampaignCta :one
+-- name: updateCampaignCta :one
 UPDATE campaign
 SET cta = $2
 WHERE cid = $1

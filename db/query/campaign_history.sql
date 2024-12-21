@@ -1,4 +1,4 @@
--- name: CreateCampaignHistory :exec
+-- name: createCampaignHistory :exec
 INSERT INTO campaign_history (
     cid,
     field_changed,

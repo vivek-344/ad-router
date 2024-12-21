@@ -9,7 +9,7 @@ import (
 	"context"
 )
 
-const createCampaignHistory = `-- name: CreateCampaignHistory :exec
+const createCampaignHistory = `-- name: createCampaignHistory :exec
 INSERT INTO campaign_history (
     cid,
     field_changed,
@@ -20,14 +20,14 @@ INSERT INTO campaign_history (
 )
 `
 
-type CreateCampaignHistoryParams struct {
+type createCampaignHistoryParams struct {
 	Cid          string `json:"cid"`
 	FieldChanged string `json:"field_changed"`
 	OldValue     string `json:"old_value"`
 	NewValue     string `json:"new_value"`
 }
 
-func (q *Queries) CreateCampaignHistory(ctx context.Context, arg CreateCampaignHistoryParams) error {
+func (q *Queries) createCampaignHistory(ctx context.Context, arg createCampaignHistoryParams) error {
 	_, err := q.db.Exec(ctx, createCampaignHistory,
 		arg.Cid,
 		arg.FieldChanged,

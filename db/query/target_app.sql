@@ -13,7 +13,7 @@ SELECT *
 FROM target_app
 WHERE cid = $1;
 
--- name: UpdateTargetApp :one
+-- name: updateTargetApp :one
 UPDATE target_app
 SET app_id = $2, rule = $3
 WHERE cid = $1

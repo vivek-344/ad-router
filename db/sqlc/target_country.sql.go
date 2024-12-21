@@ -56,20 +56,20 @@ func (q *Queries) GetTargetCountry(ctx context.Context, cid string) (TargetCount
 	return i, err
 }
 
-const updateTargetCountry = `-- name: UpdateTargetCountry :one
+const updateTargetCountry = `-- name: updateTargetCountry :one
 UPDATE target_country
 SET country = $2, rule = $3
 WHERE cid = $1
 RETURNING cid, country, rule
 `
 
-type UpdateTargetCountryParams struct {
+type updateTargetCountryParams struct {
 	Cid     string   `json:"cid"`
 	Country string   `json:"country"`
 	Rule    RuleType `json:"rule"`
 }
 
-func (q *Queries) UpdateTargetCountry(ctx context.Context, arg UpdateTargetCountryParams) (TargetCountry, error) {
+func (q *Queries) updateTargetCountry(ctx context.Context, arg updateTargetCountryParams) (TargetCountry, error) {
 	row := q.db.QueryRow(ctx, updateTargetCountry, arg.Cid, arg.Country, arg.Rule)
 	var i TargetCountry
 	err := row.Scan(&i.Cid, &i.Country, &i.Rule)
