@@ -12,25 +12,33 @@ import (
 const createCampaign = `-- name: CreateCampaign :one
 INSERT INTO campaign (
   cid,
+  name,
   img,
   cta
 ) VALUES (
-    $1, $2, $3
+    $1, $2, $3, $4
 )
-RETURNING cid, img, cta, status, created_at
+RETURNING cid, name, img, cta, status, created_at
 `
 
 type CreateCampaignParams struct {
-	Cid string `json:"cid"`
-	Img string `json:"img"`
-	Cta string `json:"cta"`
+	Cid  string `json:"cid"`
+	Name string `json:"name"`
+	Img  string `json:"img"`
+	Cta  string `json:"cta"`
 }
 
 func (q *Queries) CreateCampaign(ctx context.Context, arg CreateCampaignParams) (Campaign, error) {
-	row := q.db.QueryRow(ctx, createCampaign, arg.Cid, arg.Img, arg.Cta)
+	row := q.db.QueryRow(ctx, createCampaign,
+		arg.Cid,
+		arg.Name,
+		arg.Img,
+		arg.Cta,
+	)
 	var i Campaign
 	err := row.Scan(
 		&i.Cid,
+		&i.Name,
 		&i.Img,
 		&i.Cta,
 		&i.Status,
@@ -50,7 +58,7 @@ func (q *Queries) DeleteCampaign(ctx context.Context, cid string) error {
 }
 
 const getCampaign = `-- name: GetCampaign :one
-SELECT cid, img, cta, status, created_at
+SELECT cid, name, img, cta, status, created_at
 FROM campaign
 WHERE cid = $1
 `
@@ -60,6 +68,7 @@ func (q *Queries) GetCampaign(ctx context.Context, cid string) (Campaign, error)
 	var i Campaign
 	err := row.Scan(
 		&i.Cid,
+		&i.Name,
 		&i.Img,
 		&i.Cta,
 		&i.Status,
@@ -69,7 +78,7 @@ func (q *Queries) GetCampaign(ctx context.Context, cid string) (Campaign, error)
 }
 
 const listAllActiveCampaign = `-- name: ListAllActiveCampaign :many
-SELECT cid, img, cta, status, created_at
+SELECT cid, name, img, cta, status, created_at
 FROM campaign
 WHERE status = 'active'
 `
@@ -85,6 +94,7 @@ func (q *Queries) ListAllActiveCampaign(ctx context.Context) ([]Campaign, error)
 		var i Campaign
 		if err := rows.Scan(
 			&i.Cid,
+			&i.Name,
 			&i.Img,
 			&i.Cta,
 			&i.Status,
@@ -101,7 +111,7 @@ func (q *Queries) ListAllActiveCampaign(ctx context.Context) ([]Campaign, error)
 }
 
 const listAllCampaign = `-- name: ListAllCampaign :many
-SELECT cid, img, cta, status, created_at
+SELECT cid, name, img, cta, status, created_at
 FROM campaign
 `
 
@@ -116,6 +126,7 @@ func (q *Queries) ListAllCampaign(ctx context.Context) ([]Campaign, error) {
 		var i Campaign
 		if err := rows.Scan(
 			&i.Cid,
+			&i.Name,
 			&i.Img,
 			&i.Cta,
 			&i.Status,
@@ -152,7 +163,7 @@ const updateCampaignCta = `-- name: updateCampaignCta :one
 UPDATE campaign
 SET cta = $2
 WHERE cid = $1
-RETURNING cid, img, cta, status, created_at
+RETURNING cid, name, img, cta, status, created_at
 `
 
 type updateCampaignCtaParams struct {
@@ -165,6 +176,7 @@ func (q *Queries) updateCampaignCta(ctx context.Context, arg updateCampaignCtaPa
 	var i Campaign
 	err := row.Scan(
 		&i.Cid,
+		&i.Name,
 		&i.Img,
 		&i.Cta,
 		&i.Status,
@@ -177,7 +189,7 @@ const updateCampaignImage = `-- name: updateCampaignImage :one
 UPDATE campaign
 SET img = $2
 WHERE cid = $1
-RETURNING cid, img, cta, status, created_at
+RETURNING cid, name, img, cta, status, created_at
 `
 
 type updateCampaignImageParams struct {
@@ -190,6 +202,33 @@ func (q *Queries) updateCampaignImage(ctx context.Context, arg updateCampaignIma
 	var i Campaign
 	err := row.Scan(
 		&i.Cid,
+		&i.Name,
+		&i.Img,
+		&i.Cta,
+		&i.Status,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const updateCampaignName = `-- name: updateCampaignName :one
+UPDATE campaign
+SET name = $2
+WHERE cid = $1
+RETURNING cid, name, img, cta, status, created_at
+`
+
+type updateCampaignNameParams struct {
+	Cid  string `json:"cid"`
+	Name string `json:"name"`
+}
+
+func (q *Queries) updateCampaignName(ctx context.Context, arg updateCampaignNameParams) (Campaign, error) {
+	row := q.db.QueryRow(ctx, updateCampaignName, arg.Cid, arg.Name)
+	var i Campaign
+	err := row.Scan(
+		&i.Cid,
+		&i.Name,
 		&i.Img,
 		&i.Cta,
 		&i.Status,

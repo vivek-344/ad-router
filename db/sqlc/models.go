@@ -96,6 +96,7 @@ func (ns NullStatusType) Value() (driver.Value, error) {
 
 type Campaign struct {
 	Cid       string     `json:"cid"`
+	Name      string     `json:"name"`
 	Img       string     `json:"img"`
 	Cta       string     `json:"cta"`
 	Status    StatusType `json:"status"`

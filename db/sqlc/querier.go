@@ -27,6 +27,7 @@ type Querier interface {
 	toggleStatus(ctx context.Context, cid string) (StatusType, error)
 	updateCampaignCta(ctx context.Context, arg updateCampaignCtaParams) (Campaign, error)
 	updateCampaignImage(ctx context.Context, arg updateCampaignImageParams) (Campaign, error)
+	updateCampaignName(ctx context.Context, arg updateCampaignNameParams) (Campaign, error)
 	updateTargetApp(ctx context.Context, arg updateTargetAppParams) (TargetApp, error)
 	updateTargetCountry(ctx context.Context, arg updateTargetCountryParams) (TargetCountry, error)
 	updateTargetOs(ctx context.Context, arg updateTargetOsParams) (TargetO, error)

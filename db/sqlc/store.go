@@ -13,6 +13,7 @@ type Store interface {
 	Querier
 	AddCampaign(tx context.Context, arg AddCampaignParams) (AddCampaignResult, error)
 	ToggleStatus(ctx context.Context, cid string) error
+	UpdateCampaignName(ctx context.Context, arg UpdateCampaignNameParams) (Campaign, error)
 	UpdateCampaignCta(ctx context.Context, arg UpdateCampaignCtaParams) (Campaign, error)
 	UpdateCampaignImage(ctx context.Context, arg UpdateCampaignImageParams) (Campaign, error)
 	UpdateTargetApp(ctx context.Context, arg UpdateTargetAppParams) (TargetApp, error)
@@ -52,6 +53,7 @@ func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) erro
 
 type AddCampaignParams struct {
 	Cid         string   `json:"cid"`
+	Name        string   `json:"name"`
 	Img         string   `json:"img"`
 	Cta         string   `json:"cta"`
 	AppID       string   `json:"app_id"`
@@ -64,6 +66,7 @@ type AddCampaignParams struct {
 
 type AddCampaignResult struct {
 	Cid         string     `json:"cid"`
+	Name        string     `json:"name"`
 	Img         string     `json:"img"`
 	Cta         string     `json:"cta"`
 	AppID       string     `json:"app_id"`
@@ -81,9 +84,10 @@ func (store *SQLStore) AddCampaign(ctx context.Context, arg AddCampaignParams) (
 
 	err := store.execTx(ctx, func(q *Queries) error {
 		campaign, err := q.CreateCampaign(ctx, CreateCampaignParams{
-			Cid: arg.Cid,
-			Img: arg.Img,
-			Cta: arg.Cta,
+			Cid:  arg.Cid,
+			Name: arg.Name,
+			Img:  arg.Img,
+			Cta:  arg.Cta,
 		})
 		if err != nil {
 			return err
@@ -91,6 +95,7 @@ func (store *SQLStore) AddCampaign(ctx context.Context, arg AddCampaignParams) (
 
 		result = AddCampaignResult{
 			Cid:       campaign.Cid,
+			Name:      campaign.Name,
 			Img:       campaign.Img,
 			Cta:       campaign.Cta,
 			Status:    campaign.Status,
@@ -175,6 +180,36 @@ func (store *SQLStore) ToggleStatus(ctx context.Context, cid string) error {
 			},
 		})
 	})
+}
+
+type UpdateCampaignNameParams struct {
+	updateCampaignNameParams
+}
+
+func (store *SQLStore) UpdateCampaignName(ctx context.Context, arg UpdateCampaignNameParams) (Campaign, error) {
+	var campaign Campaign
+	err := store.execTx(ctx, func(q *Queries) error {
+		var err error
+		oldCampaign, err := q.GetCampaign(ctx, arg.Cid)
+		if err != nil {
+			return err
+		}
+
+		campaign, err = q.updateCampaignName(ctx, arg.updateCampaignNameParams)
+		if err != nil {
+			return err
+		}
+
+		return store.createHistory(ctx, q, []createCampaignHistoryParams{
+			{
+				Cid:          arg.Cid,
+				FieldChanged: "name",
+				OldValue:     oldCampaign.Name,
+				NewValue:     campaign.Name,
+			},
+		})
+	})
+	return campaign, err
 }
 
 type UpdateCampaignCtaParams struct {

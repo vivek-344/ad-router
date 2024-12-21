@@ -1,10 +1,11 @@
 -- name: CreateCampaign :one
 INSERT INTO campaign (
   cid,
+  name,
   img,
   cta
 ) VALUES (
-    $1, $2, $3
+    $1, $2, $3, $4
 )
 RETURNING *;
 
@@ -30,6 +31,12 @@ SET status = CASE
 END
 WHERE cid = $1
 RETURNING status;
+
+-- name: updateCampaignName :one
+UPDATE campaign
+SET name = $2
+WHERE cid = $1
+RETURNING *;
 
 -- name: updateCampaignImage :one
 UPDATE campaign

@@ -10,6 +10,7 @@ CREATE TYPE "status_type" AS ENUM (
 
 CREATE TABLE "campaign" (
   "cid" text PRIMARY KEY NOT NULL,
+  "name" varchar(32) NOT NULL,
   "img" text NOT NULL,
   "cta" text NOT NULL,
   "status" status_type NOT NULL DEFAULT 'active',
