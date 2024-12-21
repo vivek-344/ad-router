@@ -7,8 +7,7 @@ package db
 import (
 	"database/sql/driver"
 	"fmt"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 type RuleType string
@@ -96,20 +95,20 @@ func (ns NullStatusType) Value() (driver.Value, error) {
 }
 
 type Campaign struct {
-	Cid       string           `json:"cid"`
-	Img       string           `json:"img"`
-	Cta       string           `json:"cta"`
-	Status    StatusType       `json:"status"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
+	Cid       string     `json:"cid"`
+	Img       string     `json:"img"`
+	Cta       string     `json:"cta"`
+	Status    StatusType `json:"status"`
+	CreatedAt time.Time  `json:"created_at"`
 }
 
 type CampaignStatusHistory struct {
-	ID           int32            `json:"id"`
-	Cid          string           `json:"cid"`
-	FieldChanged string           `json:"field_changed"`
-	OldValue     string           `json:"old_value"`
-	NewValue     string           `json:"new_value"`
-	UpdatedAt    pgtype.Timestamp `json:"updated_at"`
+	ID           int32     `json:"id"`
+	Cid          string    `json:"cid"`
+	FieldChanged string    `json:"field_changed"`
+	OldValue     string    `json:"old_value"`
+	NewValue     string    `json:"new_value"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type TargetApp struct {

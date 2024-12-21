@@ -13,7 +13,7 @@ CREATE TABLE "campaign" (
   "img" text NOT NULL,
   "cta" text NOT NULL,
   "status" status_type NOT NULL DEFAULT 'active',
-  "created_at" timestamp NOT NULL DEFAULT (now())
+  "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "campaign_status_history" (
@@ -22,7 +22,7 @@ CREATE TABLE "campaign_status_history" (
   "field_changed" text NOT NULL,
   "old_value" text NOT NULL,
   "new_value" text NOT NULL,
-  "updated_at" timestamp NOT NULL DEFAULT (now())
+  "updated_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "target_app" (
