@@ -102,7 +102,7 @@ type Campaign struct {
 	CreatedAt time.Time  `json:"created_at"`
 }
 
-type CampaignStatusHistory struct {
+type CampaignHistory struct {
 	ID           int32     `json:"id"`
 	Cid          string    `json:"cid"`
 	FieldChanged string    `json:"field_changed"`

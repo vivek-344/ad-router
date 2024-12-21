@@ -10,13 +10,26 @@ import (
 
 type Querier interface {
 	CreateCampaign(ctx context.Context, arg CreateCampaignParams) (Campaign, error)
+	CreateCampaignHistory(ctx context.Context, arg CreateCampaignHistoryParams) error
+	CreateTargetApp(ctx context.Context, arg CreateTargetAppParams) (TargetApp, error)
+	CreateTargetCountry(ctx context.Context, arg CreateTargetCountryParams) (TargetCountry, error)
+	CreateTargetOs(ctx context.Context, arg CreateTargetOsParams) (TargetO, error)
 	DeleteCampaign(ctx context.Context, cid string) error
+	DeleteTargetApp(ctx context.Context, cid string) error
+	DeleteTargetCountry(ctx context.Context, cid string) error
+	DeleteTargetOs(ctx context.Context, cid string) error
 	GetCampaign(ctx context.Context, cid string) (Campaign, error)
+	GetTargetApp(ctx context.Context, cid string) (TargetApp, error)
+	GetTargetCountry(ctx context.Context, cid string) (TargetCountry, error)
+	GetTargetOs(ctx context.Context, cid string) (TargetO, error)
 	ListAllActiveCampaign(ctx context.Context) ([]Campaign, error)
 	ListAllCampaign(ctx context.Context) ([]Campaign, error)
 	ToggleStatus(ctx context.Context, cid string) error
 	UpdateCampaignCta(ctx context.Context, arg UpdateCampaignCtaParams) (Campaign, error)
 	UpdateCampaignImage(ctx context.Context, arg UpdateCampaignImageParams) (Campaign, error)
+	UpdateTargetApp(ctx context.Context, arg UpdateTargetAppParams) (TargetApp, error)
+	UpdateTargetCountry(ctx context.Context, arg UpdateTargetCountryParams) (TargetCountry, error)
+	UpdateTargetOs(ctx context.Context, arg UpdateTargetOsParams) (TargetO, error)
 }
 
 var _ Querier = (*Queries)(nil)
