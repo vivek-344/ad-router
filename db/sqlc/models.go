@@ -124,7 +124,7 @@ type TargetCountry struct {
 	Rule    RuleType `json:"rule"`
 }
 
-type TargetO struct {
+type TargetOs struct {
 	Cid  string   `json:"cid"`
 	Os   string   `json:"os"`
 	Rule RuleType `json:"rule"`

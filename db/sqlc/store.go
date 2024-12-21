@@ -18,7 +18,7 @@ type Store interface {
 	UpdateCampaignImage(ctx context.Context, arg UpdateCampaignImageParams) (Campaign, error)
 	UpdateTargetApp(ctx context.Context, arg UpdateTargetAppParams) (TargetApp, error)
 	UpdateTargetCountry(ctx context.Context, arg UpdateTargetCountryParams) (TargetCountry, error)
-	UpdateTargetOs(ctx context.Context, arg UpdateTargetOsParams) (TargetO, error)
+	UpdateTargetOs(ctx context.Context, arg UpdateTargetOsParams) (TargetOs, error)
 }
 
 type SQLStore struct {
@@ -312,8 +312,8 @@ type UpdateTargetOsParams struct {
 	updateTargetOsParams
 }
 
-func (store *SQLStore) UpdateTargetOs(ctx context.Context, arg UpdateTargetOsParams) (TargetO, error) {
-	var targetOs TargetO
+func (store *SQLStore) UpdateTargetOs(ctx context.Context, arg UpdateTargetOsParams) (TargetOs, error) {
+	var targetOs TargetOs
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 		oldTarget, err := q.GetTargetOs(ctx, arg.Cid)

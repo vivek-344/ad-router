@@ -26,9 +26,9 @@ type CreateTargetOsParams struct {
 	Rule RuleType `json:"rule"`
 }
 
-func (q *Queries) CreateTargetOs(ctx context.Context, arg CreateTargetOsParams) (TargetO, error) {
+func (q *Queries) CreateTargetOs(ctx context.Context, arg CreateTargetOsParams) (TargetOs, error) {
 	row := q.db.QueryRow(ctx, createTargetOs, arg.Cid, arg.Os, arg.Rule)
-	var i TargetO
+	var i TargetOs
 	err := row.Scan(&i.Cid, &i.Os, &i.Rule)
 	return i, err
 }
@@ -49,9 +49,9 @@ FROM target_os
 WHERE cid = $1
 `
 
-func (q *Queries) GetTargetOs(ctx context.Context, cid string) (TargetO, error) {
+func (q *Queries) GetTargetOs(ctx context.Context, cid string) (TargetOs, error) {
 	row := q.db.QueryRow(ctx, getTargetOs, cid)
-	var i TargetO
+	var i TargetOs
 	err := row.Scan(&i.Cid, &i.Os, &i.Rule)
 	return i, err
 }
@@ -69,9 +69,9 @@ type updateTargetOsParams struct {
 	Rule RuleType `json:"rule"`
 }
 
-func (q *Queries) updateTargetOs(ctx context.Context, arg updateTargetOsParams) (TargetO, error) {
+func (q *Queries) updateTargetOs(ctx context.Context, arg updateTargetOsParams) (TargetOs, error) {
 	row := q.db.QueryRow(ctx, updateTargetOs, arg.Cid, arg.Os, arg.Rule)
-	var i TargetO
+	var i TargetOs
 	err := row.Scan(&i.Cid, &i.Os, &i.Rule)
 	return i, err
 }

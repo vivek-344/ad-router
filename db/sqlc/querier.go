@@ -12,7 +12,7 @@ type Querier interface {
 	CreateCampaign(ctx context.Context, arg CreateCampaignParams) (Campaign, error)
 	CreateTargetApp(ctx context.Context, arg CreateTargetAppParams) (TargetApp, error)
 	CreateTargetCountry(ctx context.Context, arg CreateTargetCountryParams) (TargetCountry, error)
-	CreateTargetOs(ctx context.Context, arg CreateTargetOsParams) (TargetO, error)
+	CreateTargetOs(ctx context.Context, arg CreateTargetOsParams) (TargetOs, error)
 	DeleteCampaign(ctx context.Context, cid string) error
 	DeleteTargetApp(ctx context.Context, cid string) error
 	DeleteTargetCountry(ctx context.Context, cid string) error
@@ -20,7 +20,7 @@ type Querier interface {
 	GetCampaign(ctx context.Context, cid string) (Campaign, error)
 	GetTargetApp(ctx context.Context, cid string) (TargetApp, error)
 	GetTargetCountry(ctx context.Context, cid string) (TargetCountry, error)
-	GetTargetOs(ctx context.Context, cid string) (TargetO, error)
+	GetTargetOs(ctx context.Context, cid string) (TargetOs, error)
 	ListAllActiveCampaign(ctx context.Context) ([]Campaign, error)
 	ListAllCampaign(ctx context.Context) ([]Campaign, error)
 	createCampaignHistory(ctx context.Context, arg createCampaignHistoryParams) error
@@ -30,7 +30,7 @@ type Querier interface {
 	updateCampaignName(ctx context.Context, arg updateCampaignNameParams) (Campaign, error)
 	updateTargetApp(ctx context.Context, arg updateTargetAppParams) (TargetApp, error)
 	updateTargetCountry(ctx context.Context, arg updateTargetCountryParams) (TargetCountry, error)
-	updateTargetOs(ctx context.Context, arg updateTargetOsParams) (TargetO, error)
+	updateTargetOs(ctx context.Context, arg updateTargetOsParams) (TargetOs, error)
 }
 
 var _ Querier = (*Queries)(nil)
