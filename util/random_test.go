@@ -36,7 +36,9 @@ func TestRandomName(t *testing.T) {
 }
 
 func TestRandomImg(t *testing.T) {
-	require.Equal(t, "https://example.com", util.RandomImg())
+	img := util.RandomImg()
+	require.True(t, strings.HasPrefix(img, "https://example"))
+	require.True(t, strings.HasSuffix(img, ".com"))
 }
 
 func TestRandomCta(t *testing.T) {

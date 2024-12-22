@@ -2,6 +2,7 @@ package util
 
 import (
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -43,7 +44,9 @@ func RandomName() string {
 }
 
 func RandomImg() string {
-	return "https://example.com"
+	n := int(RandomInt(0, 1000))
+	str := "https://example" + strconv.Itoa(n) + ".com"
+	return str
 }
 
 func RandomCta() string {
