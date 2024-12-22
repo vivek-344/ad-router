@@ -54,4 +54,6 @@ func TestDeleteTargetApp(t *testing.T) {
 	require.Error(t, err)
 	require.EqualError(t, err, pgx.ErrNoRows.Error())
 	require.Empty(t, target_app)
+
+	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
 }

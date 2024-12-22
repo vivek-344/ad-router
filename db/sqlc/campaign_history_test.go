@@ -19,4 +19,6 @@ func TestGetAllCampaignHistory(t *testing.T) {
 	history, err := testQueries.GetAllCampaignHistory(context.Background(), campaign.Cid)
 	require.NoError(t, err)
 	require.Equal(t, len(history), 10)
+
+	store.DeleteCampaign(context.Background(), campaign.Cid)
 }

@@ -92,6 +92,8 @@ func TestReadCampaign(t *testing.T) {
 	require.Equal(t, campaign.OsRule, read_campaign.OsRule)
 	require.Equal(t, campaign.Status, read_campaign.Status)
 	require.Equal(t, campaign.CreatedAt, read_campaign.CreatedAt)
+
+	store.DeleteCampaign(context.Background(), campaign.Cid)
 }
 
 func TestToggleStatus(t *testing.T) {
