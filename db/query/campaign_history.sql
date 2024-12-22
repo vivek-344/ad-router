@@ -7,3 +7,17 @@ INSERT INTO campaign_history (
 ) VALUES (
     $1, $2, $3, $4
 );
+
+-- name: GetCampaignHistory :one
+SELECT *
+FROM campaign_history
+WHERE cid = $1
+ORDER BY updated_at DESC
+LIMIT 1;
+
+-- name: GetLastTwoCampaignHistory :many
+SELECT *
+FROM campaign_history
+WHERE cid = $1
+ORDER BY updated_at DESC
+LIMIT 2;

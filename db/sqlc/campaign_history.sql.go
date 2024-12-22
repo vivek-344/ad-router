@@ -9,6 +9,63 @@ import (
 	"context"
 )
 
+const getCampaignHistory = `-- name: GetCampaignHistory :one
+SELECT id, cid, field_changed, old_value, new_value, updated_at
+FROM campaign_history
+WHERE cid = $1
+ORDER BY updated_at DESC
+LIMIT 1
+`
+
+func (q *Queries) GetCampaignHistory(ctx context.Context, cid string) (CampaignHistory, error) {
+	row := q.db.QueryRow(ctx, getCampaignHistory, cid)
+	var i CampaignHistory
+	err := row.Scan(
+		&i.ID,
+		&i.Cid,
+		&i.FieldChanged,
+		&i.OldValue,
+		&i.NewValue,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getLastTwoCampaignHistory = `-- name: GetLastTwoCampaignHistory :many
+SELECT id, cid, field_changed, old_value, new_value, updated_at
+FROM campaign_history
+WHERE cid = $1
+ORDER BY updated_at DESC
+LIMIT 2
+`
+
+func (q *Queries) GetLastTwoCampaignHistory(ctx context.Context, cid string) ([]CampaignHistory, error) {
+	rows, err := q.db.Query(ctx, getLastTwoCampaignHistory, cid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []CampaignHistory{}
+	for rows.Next() {
+		var i CampaignHistory
+		if err := rows.Scan(
+			&i.ID,
+			&i.Cid,
+			&i.FieldChanged,
+			&i.OldValue,
+			&i.NewValue,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const createCampaignHistory = `-- name: createCampaignHistory :exec
 INSERT INTO campaign_history (
     cid,

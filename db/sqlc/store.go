@@ -183,7 +183,8 @@ func (store *SQLStore) ToggleStatus(ctx context.Context, cid string) error {
 }
 
 type UpdateCampaignNameParams struct {
-	updateCampaignNameParams
+	Cid  string `json:"cid"`
+	Name string `json:"name"`
 }
 
 func (store *SQLStore) UpdateCampaignName(ctx context.Context, arg UpdateCampaignNameParams) (Campaign, error) {
@@ -195,7 +196,10 @@ func (store *SQLStore) UpdateCampaignName(ctx context.Context, arg UpdateCampaig
 			return err
 		}
 
-		campaign, err = q.updateCampaignName(ctx, arg.updateCampaignNameParams)
+		campaign, err = q.updateCampaignName(ctx, updateCampaignNameParams{
+			Cid:  arg.Cid,
+			Name: arg.Name,
+		})
 		if err != nil {
 			return err
 		}
@@ -213,7 +217,8 @@ func (store *SQLStore) UpdateCampaignName(ctx context.Context, arg UpdateCampaig
 }
 
 type UpdateCampaignCtaParams struct {
-	updateCampaignCtaParams
+	Cid string `json:"cid"`
+	Cta string `json:"cta"`
 }
 
 func (store *SQLStore) UpdateCampaignCta(ctx context.Context, arg UpdateCampaignCtaParams) (Campaign, error) {
@@ -225,7 +230,10 @@ func (store *SQLStore) UpdateCampaignCta(ctx context.Context, arg UpdateCampaign
 			return err
 		}
 
-		campaign, err = q.updateCampaignCta(ctx, arg.updateCampaignCtaParams)
+		campaign, err = q.updateCampaignCta(ctx, updateCampaignCtaParams{
+			Cid: arg.Cid,
+			Cta: arg.Cta,
+		})
 		if err != nil {
 			return err
 		}
@@ -243,7 +251,8 @@ func (store *SQLStore) UpdateCampaignCta(ctx context.Context, arg UpdateCampaign
 }
 
 type UpdateCampaignImageParams struct {
-	updateCampaignImageParams
+	Cid string `json:"cid"`
+	Img string `json:"img"`
 }
 
 func (store *SQLStore) UpdateCampaignImage(ctx context.Context, arg UpdateCampaignImageParams) (Campaign, error) {
@@ -255,7 +264,10 @@ func (store *SQLStore) UpdateCampaignImage(ctx context.Context, arg UpdateCampai
 			return err
 		}
 
-		campaign, err = q.updateCampaignImage(ctx, arg.updateCampaignImageParams)
+		campaign, err = q.updateCampaignImage(ctx, updateCampaignImageParams{
+			Cid: arg.Cid,
+			Img: arg.Img,
+		})
 		if err != nil {
 			return err
 		}
@@ -273,7 +285,9 @@ func (store *SQLStore) UpdateCampaignImage(ctx context.Context, arg UpdateCampai
 }
 
 type UpdateTargetAppParams struct {
-	updateTargetAppParams
+	Cid   string   `json:"cid"`
+	AppID string   `json:"app_id"`
+	Rule  RuleType `json:"rule"`
 }
 
 func (store *SQLStore) UpdateTargetApp(ctx context.Context, arg UpdateTargetAppParams) (TargetApp, error) {
@@ -285,7 +299,11 @@ func (store *SQLStore) UpdateTargetApp(ctx context.Context, arg UpdateTargetAppP
 			return err
 		}
 
-		targetApp, err = q.updateTargetApp(ctx, arg.updateTargetAppParams)
+		targetApp, err = q.updateTargetApp(ctx, updateTargetAppParams{
+			Cid:   arg.Cid,
+			AppID: arg.AppID,
+			Rule:  arg.Rule,
+		})
 		if err != nil {
 			return err
 		}
@@ -309,7 +327,9 @@ func (store *SQLStore) UpdateTargetApp(ctx context.Context, arg UpdateTargetAppP
 }
 
 type UpdateTargetOsParams struct {
-	updateTargetOsParams
+	Cid  string   `json:"cid"`
+	Os   string   `json:"os"`
+	Rule RuleType `json:"rule"`
 }
 
 func (store *SQLStore) UpdateTargetOs(ctx context.Context, arg UpdateTargetOsParams) (TargetOs, error) {
@@ -321,7 +341,11 @@ func (store *SQLStore) UpdateTargetOs(ctx context.Context, arg UpdateTargetOsPar
 			return err
 		}
 
-		targetOs, err = q.updateTargetOs(ctx, arg.updateTargetOsParams)
+		targetOs, err = q.updateTargetOs(ctx, updateTargetOsParams{
+			Cid:  arg.Cid,
+			Os:   arg.Os,
+			Rule: arg.Rule,
+		})
 		if err != nil {
 			return err
 		}
@@ -345,7 +369,9 @@ func (store *SQLStore) UpdateTargetOs(ctx context.Context, arg UpdateTargetOsPar
 }
 
 type UpdateTargetCountryParams struct {
-	updateTargetCountryParams
+	Cid     string   `json:"cid"`
+	Country string   `json:"country"`
+	Rule    RuleType `json:"rule"`
 }
 
 func (store *SQLStore) UpdateTargetCountry(ctx context.Context, arg UpdateTargetCountryParams) (TargetCountry, error) {
@@ -357,7 +383,11 @@ func (store *SQLStore) UpdateTargetCountry(ctx context.Context, arg UpdateTarget
 			return err
 		}
 
-		targetCountry, err = q.updateTargetCountry(ctx, arg.updateTargetCountryParams)
+		targetCountry, err = q.updateTargetCountry(ctx, updateTargetCountryParams{
+			Cid:     arg.Cid,
+			Country: arg.Country,
+			Rule:    arg.Rule,
+		})
 		if err != nil {
 			return err
 		}

@@ -80,7 +80,7 @@ func (q *Queries) GetCampaign(ctx context.Context, cid string) (Campaign, error)
 const listAllActiveCampaign = `-- name: ListAllActiveCampaign :many
 SELECT cid, name, img, cta, status, created_at
 FROM campaign
-WHERE status = 'active'
+WHERE status = 'active'::status_type
 `
 
 func (q *Queries) ListAllActiveCampaign(ctx context.Context) ([]Campaign, error) {
@@ -145,8 +145,8 @@ func (q *Queries) ListAllCampaign(ctx context.Context) ([]Campaign, error) {
 const toggleStatus = `-- name: toggleStatus :one
 UPDATE campaign
 SET status = CASE 
-    WHEN status = 'active' THEN 'inactive'
-    ELSE 'inactive'
+    WHEN status = 'active'::status_type THEN 'inactive'::status_type
+    ELSE 'active'::status_type
 END
 WHERE cid = $1
 RETURNING status

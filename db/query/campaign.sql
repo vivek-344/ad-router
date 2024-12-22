@@ -21,13 +21,13 @@ FROM campaign;
 -- name: ListAllActiveCampaign :many
 SELECT *
 FROM campaign
-WHERE status = 'active';
+WHERE status = 'active'::status_type;
 
 -- name: toggleStatus :one
 UPDATE campaign
 SET status = CASE 
-    WHEN status = 'active' THEN 'inactive'
-    ELSE 'inactive'
+    WHEN status = 'active'::status_type THEN 'inactive'::status_type
+    ELSE 'active'::status_type
 END
 WHERE cid = $1
 RETURNING status;

@@ -18,6 +18,8 @@ type Querier interface {
 	DeleteTargetCountry(ctx context.Context, cid string) error
 	DeleteTargetOs(ctx context.Context, cid string) error
 	GetCampaign(ctx context.Context, cid string) (Campaign, error)
+	GetCampaignHistory(ctx context.Context, cid string) (CampaignHistory, error)
+	GetLastTwoCampaignHistory(ctx context.Context, cid string) ([]CampaignHistory, error)
 	GetTargetApp(ctx context.Context, cid string) (TargetApp, error)
 	GetTargetCountry(ctx context.Context, cid string) (TargetCountry, error)
 	GetTargetOs(ctx context.Context, cid string) (TargetOs, error)
