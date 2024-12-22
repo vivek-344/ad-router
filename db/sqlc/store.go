@@ -12,6 +12,7 @@ import (
 type Store interface {
 	Querier
 	AddCampaign(tx context.Context, arg AddCampaignParams) (AddCampaignResult, error)
+	ReadCampaign(ctx context.Context, cid string) (CompleteCampaign, error)
 	ToggleStatus(ctx context.Context, cid string) error
 	UpdateCampaignName(ctx context.Context, arg UpdateCampaignNameParams) (Campaign, error)
 	UpdateCampaignCta(ctx context.Context, arg UpdateCampaignCtaParams) (Campaign, error)
@@ -145,6 +146,47 @@ func (store *SQLStore) AddCampaign(ctx context.Context, arg AddCampaignParams) (
 	})
 
 	return result, err
+}
+
+type CompleteCampaign struct {
+	Cid         string     `json:"cid"`
+	Name        string     `json:"name"`
+	Img         string     `json:"img"`
+	Cta         string     `json:"cta"`
+	AppID       string     `json:"app_id"`
+	AppRule     RuleType   `json:"app_rule"`
+	Country     string     `json:"country"`
+	CountryRule RuleType   `json:"country_rule"`
+	Os          string     `json:"os"`
+	OsRule      RuleType   `json:"os_rule"`
+	Status      StatusType `json:"status"`
+	CreatedAt   time.Time  `json:"created_at"`
+}
+
+func (store *SQLStore) ReadCampaign(ctx context.Context, cid string) (CompleteCampaign, error) {
+	campaign, err := store.GetCampaign(ctx, cid)
+	if err != nil {
+		return CompleteCampaign{}, err
+	}
+
+	TargetApp, _ := store.GetTargetApp(ctx, cid)
+	TargetCountry, _ := store.GetTargetCountry(ctx, cid)
+	TargetOs, _ := store.GetTargetOs(ctx, cid)
+
+	return CompleteCampaign{
+		Cid:         cid,
+		Name:        campaign.Name,
+		Img:         campaign.Img,
+		Cta:         campaign.Cta,
+		AppID:       TargetApp.AppID,
+		AppRule:     TargetApp.Rule,
+		Country:     TargetCountry.Country,
+		CountryRule: TargetCountry.Rule,
+		Os:          TargetOs.Os,
+		OsRule:      TargetOs.Rule,
+		Status:      campaign.Status,
+		CreatedAt:   campaign.CreatedAt,
+	}, nil
 }
 
 func (store *SQLStore) createHistory(ctx context.Context, q *Queries, args []createCampaignHistoryParams) error {

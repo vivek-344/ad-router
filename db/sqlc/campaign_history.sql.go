@@ -9,6 +9,40 @@ import (
 	"context"
 )
 
+const getAllCampaignHistory = `-- name: GetAllCampaignHistory :many
+SELECT id, cid, field_changed, old_value, new_value, updated_at
+FROM campaign_history
+WHERE cid = $1
+ORDER BY updated_at DESC
+`
+
+func (q *Queries) GetAllCampaignHistory(ctx context.Context, cid string) ([]CampaignHistory, error) {
+	rows, err := q.db.Query(ctx, getAllCampaignHistory, cid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []CampaignHistory{}
+	for rows.Next() {
+		var i CampaignHistory
+		if err := rows.Scan(
+			&i.ID,
+			&i.Cid,
+			&i.FieldChanged,
+			&i.OldValue,
+			&i.NewValue,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCampaignHistory = `-- name: GetCampaignHistory :one
 SELECT id, cid, field_changed, old_value, new_value, updated_at
 FROM campaign_history

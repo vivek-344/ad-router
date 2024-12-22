@@ -29,7 +29,7 @@ func createRandomCampaign(t *testing.T) db.Campaign {
 	return campaign
 }
 
-func TestAddCampaign(t *testing.T) {
+func createRandomCompleteCampaign(t *testing.T) db.AddCampaignResult {
 	store := db.NewStore(testDB)
 
 	arg := db.AddCampaignParams{
@@ -66,7 +66,32 @@ func TestAddCampaign(t *testing.T) {
 	require.Equal(t, db.StatusType("active"), campaign.Status)
 	require.NotEmpty(t, campaign.CreatedAt)
 
-	store.DeleteCampaign(context.Background(), arg.Cid)
+	return campaign
+}
+
+func TestAddCampaign(t *testing.T) {
+	campaign := createRandomCompleteCampaign(t)
+	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
+}
+
+func TestReadCampaign(t *testing.T) {
+	store := db.NewStore(testDB)
+	campaign := createRandomCompleteCampaign(t)
+	read_campaign, err := store.ReadCampaign(context.Background(), campaign.Cid)
+	require.NoError(t, err)
+
+	require.Equal(t, campaign.Cid, read_campaign.Cid)
+	require.Equal(t, campaign.Name, read_campaign.Name)
+	require.Equal(t, campaign.Img, read_campaign.Img)
+	require.Equal(t, campaign.Cta, read_campaign.Cta)
+	require.Equal(t, campaign.AppID, read_campaign.AppID)
+	require.Equal(t, campaign.AppRule, read_campaign.AppRule)
+	require.Equal(t, campaign.Country, read_campaign.Country)
+	require.Equal(t, campaign.CountryRule, read_campaign.CountryRule)
+	require.Equal(t, campaign.Os, read_campaign.Os)
+	require.Equal(t, campaign.OsRule, read_campaign.OsRule)
+	require.Equal(t, campaign.Status, read_campaign.Status)
+	require.Equal(t, campaign.CreatedAt, read_campaign.CreatedAt)
 }
 
 func TestToggleStatus(t *testing.T) {
