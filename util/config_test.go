@@ -8,7 +8,7 @@ import (
 )
 
 func TestLoadConfig(t *testing.T) {
-	config, err := util.LoadConfig("../..")
+	config, err := util.LoadConfig("..")
 
 	require.NoError(t, err)
 	require.NotEmpty(t, config.DBSource)
