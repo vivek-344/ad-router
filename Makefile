@@ -10,10 +10,10 @@ dropdb:
 	docker exec -it postgres dropdb ad_router
 
 migrateup:
-	migrate -path db/migration -database ${DB_URL} -verbose up
+	migrate -path db/migration -database ${DB_SOURCE} -verbose up
 
 migratedown:
-	migrate -path db/migration -database ${DB_URL} -verbose down
+	migrate -path db/migration -database ${DB_SOURCE} -verbose down
 
 sqlc:
 	sqlc generate
