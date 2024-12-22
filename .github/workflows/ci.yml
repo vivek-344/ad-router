@@ -42,6 +42,13 @@ jobs:
         sudo mv migrate /usr/bin/
         which migrate
 
+    - name: Write secrets to app.env file
+      run: |
+        echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> app.env
+        echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> app.env
+        echo "DB_SOURCE=${{ secrets.DB_SOURCE }}" >> app.env
+        echo "SERVER_ADDRESS=${{ secrets.SERVER_ADDRESS }}" >> app.env
+
     - name: Run migrations
       run: make migrateup
 
