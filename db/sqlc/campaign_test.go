@@ -17,26 +17,25 @@ func TestListCampaigns(t *testing.T) {
 		all_campaign = append(all_campaign, campaign)
 	}
 
-	listed_campaigns, err := testQueries.ListCampaigns(context.Background())
+	listed_campaigns, err := testStore.ListCampaigns(context.Background())
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, len(listed_campaigns), 10)
 
 	for _, campaign := range all_campaign {
 		require.Contains(t, listed_campaigns, campaign)
-		testQueries.DeleteCampaign(context.Background(), campaign.Cid)
+		testStore.DeleteCampaign(context.Background(), campaign.Cid)
 	}
 }
 
 func TestListActiveCampaigns(t *testing.T) {
-	store := db.NewStore(testDB)
 	var all_campaign []db.Campaign
 	var active_campaigns []db.Campaign
 	var active_count int
 	for range 10 {
 		campaign := addRandomCampaign(t)
 		if util.RandomBool() {
-			store.ToggleStatus(context.Background(), campaign.Cid)
-			campaign, err := testQueries.GetCampaign(context.Background(), campaign.Cid)
+			testStore.ToggleStatus(context.Background(), campaign.Cid)
+			campaign, err := testStore.GetCampaign(context.Background(), campaign.Cid)
 			require.NoError(t, err)
 			all_campaign = append(all_campaign, campaign)
 		} else {
@@ -46,7 +45,7 @@ func TestListActiveCampaigns(t *testing.T) {
 		}
 	}
 
-	listed_campaigns, err := testQueries.ListActiveCampaigns(context.Background())
+	listed_campaigns, err := testStore.ListActiveCampaigns(context.Background())
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, len(listed_campaigns), active_count)
 
@@ -54,16 +53,16 @@ func TestListActiveCampaigns(t *testing.T) {
 		if campaign.Status == db.StatusType("active") {
 			require.Contains(t, listed_campaigns, campaign)
 		}
-		testQueries.DeleteCampaign(context.Background(), campaign.Cid)
+		testStore.DeleteCampaign(context.Background(), campaign.Cid)
 	}
 }
 
 func TestDeleteCampaign(t *testing.T) {
 	campaign := addRandomCampaign(t)
-	err := testQueries.DeleteCampaign(context.Background(), campaign.Cid)
+	err := testStore.DeleteCampaign(context.Background(), campaign.Cid)
 	require.NoError(t, err)
 
-	campaign, err = testQueries.GetCampaign(context.Background(), campaign.Cid)
+	campaign, err = testStore.GetCampaign(context.Background(), campaign.Cid)
 	require.Error(t, err)
 	require.EqualError(t, err, pgx.ErrNoRows.Error())
 	require.Empty(t, campaign)

@@ -10,8 +10,6 @@ import (
 )
 
 func TestDelivery(t *testing.T) {
-	store := db.NewStore(testDB)
-
 	campaigns := make([]db.Campaign, 3)
 
 	campaigns[0] = addRandomCampaign(t)
@@ -20,7 +18,7 @@ func TestDelivery(t *testing.T) {
 		AppID: "app1,app2,app3",
 		Rule:  "include",
 	}
-	_, err := store.AddTargetApp(context.Background(), arg1)
+	_, err := testStore.AddTargetApp(context.Background(), arg1)
 	require.NoError(t, err)
 
 	campaigns[1] = addRandomCampaign(t)
@@ -29,7 +27,7 @@ func TestDelivery(t *testing.T) {
 		Country: "US,UK,CA",
 		Rule:    "exclude",
 	}
-	_, err = store.AddTargetCountry(context.Background(), arg2)
+	_, err = testStore.AddTargetCountry(context.Background(), arg2)
 	require.NoError(t, err)
 
 	campaigns[2] = addRandomCampaign(t)
@@ -38,7 +36,7 @@ func TestDelivery(t *testing.T) {
 		Os:   "android,ios",
 		Rule: "include",
 	}
-	_, err = store.AddTargetOs(context.Background(), arg3)
+	_, err = testStore.AddTargetOs(context.Background(), arg3)
 	require.NoError(t, err)
 
 	testCases := []struct {
@@ -116,14 +114,14 @@ func TestDelivery(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			results, err := store.Delivery(context.Background(), tc.deliveryArgs)
+			results, err := testStore.Delivery(context.Background(), tc.deliveryArgs)
 			require.NoError(t, err)
 			tc.checkResults(t, results)
 		})
 	}
 
 	for _, campaign := range campaigns {
-		err := store.DeleteCampaign(context.Background(), campaign.Cid)
+		err := testStore.DeleteCampaign(context.Background(), campaign.Cid)
 		require.NoError(t, err)
 	}
 }
@@ -144,7 +142,7 @@ func addRandomCampaign(t *testing.T) db.Campaign {
 		Cta:  util.RandomCta(),
 	}
 
-	campaign, err := testQueries.AddCampaign(context.Background(), arg)
+	campaign, err := testStore.AddCampaign(context.Background(), arg)
 	require.NoError(t, err)
 	require.Equal(t, arg.Cid, campaign.Cid)
 	require.Equal(t, arg.Name, campaign.Name)
@@ -157,8 +155,6 @@ func addRandomCampaign(t *testing.T) db.Campaign {
 }
 
 func createRandomCampaign(t *testing.T) db.CreateCampaignResult {
-	store := db.NewStore(testDB)
-
 	arg := db.CreateCampaignParams{
 		Cid:  util.RandomCid(),
 		Name: util.RandomName(),
@@ -178,7 +174,7 @@ func createRandomCampaign(t *testing.T) db.CreateCampaignResult {
 		arg.OsRule = db.RuleType(util.RandomRule())
 	}
 
-	campaign, err := store.CreateCampaign(context.Background(), arg)
+	campaign, err := testStore.CreateCampaign(context.Background(), arg)
 	require.NoError(t, err)
 	require.Equal(t, arg.Cid, campaign.Cid)
 	require.Equal(t, arg.Name, campaign.Name)
@@ -198,13 +194,12 @@ func createRandomCampaign(t *testing.T) db.CreateCampaignResult {
 
 func TestCreateCampaign(t *testing.T) {
 	campaign := createRandomCampaign(t)
-	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), campaign.Cid)
 }
 
 func TestReadCampaign(t *testing.T) {
-	store := db.NewStore(testDB)
 	campaign := createRandomCampaign(t)
-	read_campaign, err := store.ReadCampaign(context.Background(), campaign.Cid)
+	read_campaign, err := testStore.ReadCampaign(context.Background(), campaign.Cid)
 	require.NoError(t, err)
 
 	require.Equal(t, campaign.Cid, read_campaign.Cid)
@@ -220,17 +215,16 @@ func TestReadCampaign(t *testing.T) {
 	require.Equal(t, campaign.Status, read_campaign.Status)
 	require.Equal(t, campaign.CreatedAt, read_campaign.CreatedAt)
 
-	store.DeleteCampaign(context.Background(), campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), campaign.Cid)
 }
 
 func TestToggleStatus(t *testing.T) {
-	store := db.NewStore(testDB)
 	old_campaign := addRandomCampaign(t)
 
-	err := store.ToggleStatus(context.Background(), old_campaign.Cid)
+	err := testStore.ToggleStatus(context.Background(), old_campaign.Cid)
 	require.NoError(t, err)
 
-	updated_campaign, err := testQueries.GetCampaign(context.Background(), old_campaign.Cid)
+	updated_campaign, err := testStore.GetCampaign(context.Background(), old_campaign.Cid)
 	require.NoError(t, err)
 	require.Equal(t, old_campaign.Cid, updated_campaign.Cid)
 	require.Equal(t, old_campaign.Name, updated_campaign.Name)
@@ -239,7 +233,7 @@ func TestToggleStatus(t *testing.T) {
 	require.Equal(t, db.StatusType("inactive"), updated_campaign.Status)
 	require.Equal(t, old_campaign.CreatedAt, updated_campaign.CreatedAt)
 
-	campaignHistory, err := testQueries.GetCampaignHistory(context.Background(), old_campaign.Cid)
+	campaignHistory, err := testStore.GetCampaignHistory(context.Background(), old_campaign.Cid)
 	require.NoError(t, err)
 	require.NotEmpty(t, campaignHistory.ID)
 	require.Equal(t, updated_campaign.Cid, campaignHistory.Cid)
@@ -249,10 +243,10 @@ func TestToggleStatus(t *testing.T) {
 	require.NotEmpty(t, campaignHistory.UpdatedAt)
 
 	old_campaign = updated_campaign
-	err = store.ToggleStatus(context.Background(), old_campaign.Cid)
+	err = testStore.ToggleStatus(context.Background(), old_campaign.Cid)
 	require.NoError(t, err)
 
-	updated_campaign, err = testQueries.GetCampaign(context.Background(), old_campaign.Cid)
+	updated_campaign, err = testStore.GetCampaign(context.Background(), old_campaign.Cid)
 	require.NoError(t, err)
 	require.Equal(t, old_campaign.Cid, updated_campaign.Cid)
 	require.Equal(t, old_campaign.Name, updated_campaign.Name)
@@ -261,7 +255,7 @@ func TestToggleStatus(t *testing.T) {
 	require.Equal(t, db.StatusType("active"), updated_campaign.Status)
 	require.Equal(t, old_campaign.CreatedAt, updated_campaign.CreatedAt)
 
-	campaignHistory, err = testQueries.GetCampaignHistory(context.Background(), updated_campaign.Cid)
+	campaignHistory, err = testStore.GetCampaignHistory(context.Background(), updated_campaign.Cid)
 	require.NoError(t, err)
 	require.NotEmpty(t, campaignHistory.ID)
 	require.Equal(t, updated_campaign.Cid, campaignHistory.Cid)
@@ -270,11 +264,10 @@ func TestToggleStatus(t *testing.T) {
 	require.Equal(t, "status", campaignHistory.FieldChanged)
 	require.NotEmpty(t, campaignHistory.UpdatedAt)
 
-	store.DeleteCampaign(context.Background(), updated_campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), updated_campaign.Cid)
 }
 
 func TestUpdateCampaignName(t *testing.T) {
-	store := db.NewStore(testDB)
 	old_campaign := addRandomCampaign(t)
 
 	var newName string
@@ -290,7 +283,7 @@ func TestUpdateCampaignName(t *testing.T) {
 		Name: newName,
 	}
 
-	updated_campaign, err := store.UpdateCampaignName(context.Background(), arg)
+	updated_campaign, err := testStore.UpdateCampaignName(context.Background(), arg)
 	require.NoError(t, err)
 	require.Equal(t, old_campaign.Cid, updated_campaign.Cid)
 	require.Equal(t, arg.Name, updated_campaign.Name)
@@ -299,7 +292,7 @@ func TestUpdateCampaignName(t *testing.T) {
 	require.Equal(t, old_campaign.Status, updated_campaign.Status)
 	require.Equal(t, old_campaign.CreatedAt, updated_campaign.CreatedAt)
 
-	campaignHistory, err := testQueries.GetCampaignHistory(context.Background(), arg.Cid)
+	campaignHistory, err := testStore.GetCampaignHistory(context.Background(), arg.Cid)
 	require.NoError(t, err)
 	require.NotEmpty(t, campaignHistory.ID)
 	require.Equal(t, arg.Cid, campaignHistory.Cid)
@@ -308,11 +301,10 @@ func TestUpdateCampaignName(t *testing.T) {
 	require.Equal(t, "name", campaignHistory.FieldChanged)
 	require.NotEmpty(t, campaignHistory.UpdatedAt)
 
-	store.DeleteCampaign(context.Background(), arg.Cid)
+	testStore.DeleteCampaign(context.Background(), arg.Cid)
 }
 
 func TestUpdateCampaignCta(t *testing.T) {
-	store := db.NewStore(testDB)
 	old_campaign := addRandomCampaign(t)
 
 	var newCta string
@@ -328,7 +320,7 @@ func TestUpdateCampaignCta(t *testing.T) {
 		Cta: newCta,
 	}
 
-	updated_campaign, err := store.UpdateCampaignCta(context.Background(), arg)
+	updated_campaign, err := testStore.UpdateCampaignCta(context.Background(), arg)
 	require.NoError(t, err)
 	require.Equal(t, old_campaign.Cid, updated_campaign.Cid)
 	require.Equal(t, old_campaign.Name, updated_campaign.Name)
@@ -337,7 +329,7 @@ func TestUpdateCampaignCta(t *testing.T) {
 	require.Equal(t, old_campaign.Status, updated_campaign.Status)
 	require.Equal(t, old_campaign.CreatedAt, updated_campaign.CreatedAt)
 
-	campaignHistory, err := testQueries.GetCampaignHistory(context.Background(), arg.Cid)
+	campaignHistory, err := testStore.GetCampaignHistory(context.Background(), arg.Cid)
 	require.NoError(t, err)
 	require.NotEmpty(t, campaignHistory.ID)
 	require.Equal(t, arg.Cid, campaignHistory.Cid)
@@ -346,11 +338,10 @@ func TestUpdateCampaignCta(t *testing.T) {
 	require.Equal(t, "cta", campaignHistory.FieldChanged)
 	require.NotEmpty(t, campaignHistory.UpdatedAt)
 
-	store.DeleteCampaign(context.Background(), arg.Cid)
+	testStore.DeleteCampaign(context.Background(), arg.Cid)
 }
 
 func TestUpdateCampaignImage(t *testing.T) {
-	store := db.NewStore(testDB)
 	old_campaign := addRandomCampaign(t)
 
 	var newImg string
@@ -366,7 +357,7 @@ func TestUpdateCampaignImage(t *testing.T) {
 		Img: newImg,
 	}
 
-	updated_campaign, err := store.UpdateCampaignImage(context.Background(), arg)
+	updated_campaign, err := testStore.UpdateCampaignImage(context.Background(), arg)
 	require.NoError(t, err)
 	require.Equal(t, old_campaign.Cid, updated_campaign.Cid)
 	require.Equal(t, old_campaign.Name, updated_campaign.Name)
@@ -375,7 +366,7 @@ func TestUpdateCampaignImage(t *testing.T) {
 	require.Equal(t, old_campaign.Status, updated_campaign.Status)
 	require.Equal(t, old_campaign.CreatedAt, updated_campaign.CreatedAt)
 
-	campaignHistory, err := testQueries.GetCampaignHistory(context.Background(), arg.Cid)
+	campaignHistory, err := testStore.GetCampaignHistory(context.Background(), arg.Cid)
 	require.NoError(t, err)
 	require.NotEmpty(t, campaignHistory.ID)
 	require.Equal(t, arg.Cid, campaignHistory.Cid)
@@ -384,11 +375,10 @@ func TestUpdateCampaignImage(t *testing.T) {
 	require.Equal(t, "img", campaignHistory.FieldChanged)
 	require.NotEmpty(t, campaignHistory.UpdatedAt)
 
-	store.DeleteCampaign(context.Background(), arg.Cid)
+	testStore.DeleteCampaign(context.Background(), arg.Cid)
 }
 
 func TestUpdateTargetApp(t *testing.T) {
-	store := db.NewStore(testDB)
 	campaign := addRandomCampaign(t)
 
 	new_arg := db.AddTargetAppParams{
@@ -397,7 +387,7 @@ func TestUpdateTargetApp(t *testing.T) {
 		Rule:  db.RuleType(util.RandomRule()),
 	}
 
-	old_target_app, err := store.AddTargetApp(context.Background(), new_arg)
+	old_target_app, err := testStore.AddTargetApp(context.Background(), new_arg)
 	require.NoError(t, err)
 	require.Equal(t, new_arg.Cid, old_target_app.Cid)
 	require.Equal(t, new_arg.AppID, old_target_app.AppID)
@@ -417,13 +407,13 @@ func TestUpdateTargetApp(t *testing.T) {
 		Rule:  db.RuleType(util.RandomRule()),
 	}
 
-	updated_target_app, err := store.UpdateTargetApp(context.Background(), update_arg)
+	updated_target_app, err := testStore.UpdateTargetApp(context.Background(), update_arg)
 	require.NoError(t, err)
 	require.Equal(t, old_target_app.Cid, updated_target_app.Cid)
 	require.Equal(t, update_arg.AppID, updated_target_app.AppID)
 	require.Equal(t, update_arg.Rule, updated_target_app.Rule)
 
-	campaignHistory, err := testQueries.GetLastTwoCampaignHistory(context.Background(), campaign.Cid)
+	campaignHistory, err := testStore.GetLastTwoCampaignHistory(context.Background(), campaign.Cid)
 	require.NoError(t, err)
 
 	for _, history := range campaignHistory {
@@ -443,11 +433,10 @@ func TestUpdateTargetApp(t *testing.T) {
 		}
 	}
 
-	store.DeleteCampaign(context.Background(), campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), campaign.Cid)
 }
 
 func TestUpdateTargetOs(t *testing.T) {
-	store := db.NewStore(testDB)
 	campaign := addRandomCampaign(t)
 
 	new_arg := db.AddTargetOsParams{
@@ -456,7 +445,7 @@ func TestUpdateTargetOs(t *testing.T) {
 		Rule: db.RuleType(util.RandomRule()),
 	}
 
-	old_target_os, err := store.AddTargetOs(context.Background(), new_arg)
+	old_target_os, err := testStore.AddTargetOs(context.Background(), new_arg)
 	require.NoError(t, err)
 	require.Equal(t, new_arg.Cid, old_target_os.Cid)
 	require.Equal(t, new_arg.Os, old_target_os.Os)
@@ -476,13 +465,13 @@ func TestUpdateTargetOs(t *testing.T) {
 		Rule: db.RuleType(util.RandomRule()),
 	}
 
-	updated_target_os, err := store.UpdateTargetOs(context.Background(), update_arg)
+	updated_target_os, err := testStore.UpdateTargetOs(context.Background(), update_arg)
 	require.NoError(t, err)
 	require.Equal(t, campaign.Cid, updated_target_os.Cid)
 	require.Equal(t, update_arg.Os, updated_target_os.Os)
 	require.Equal(t, update_arg.Rule, updated_target_os.Rule)
 
-	campaignHistory, err := testQueries.GetLastTwoCampaignHistory(context.Background(), campaign.Cid)
+	campaignHistory, err := testStore.GetLastTwoCampaignHistory(context.Background(), campaign.Cid)
 	require.NoError(t, err)
 
 	for _, history := range campaignHistory {
@@ -502,11 +491,10 @@ func TestUpdateTargetOs(t *testing.T) {
 		}
 	}
 
-	store.DeleteCampaign(context.Background(), campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), campaign.Cid)
 }
 
 func TestUpdateTargetCountry(t *testing.T) {
-	store := db.NewStore(testDB)
 	campaign := addRandomCampaign(t)
 
 	new_arg := db.AddTargetCountryParams{
@@ -515,7 +503,7 @@ func TestUpdateTargetCountry(t *testing.T) {
 		Rule:    db.RuleType(util.RandomRule()),
 	}
 
-	old_target_country, err := store.AddTargetCountry(context.Background(), new_arg)
+	old_target_country, err := testStore.AddTargetCountry(context.Background(), new_arg)
 	require.NoError(t, err)
 	require.Equal(t, new_arg.Cid, old_target_country.Cid)
 	require.Equal(t, new_arg.Country, old_target_country.Country)
@@ -535,13 +523,13 @@ func TestUpdateTargetCountry(t *testing.T) {
 		Rule:    db.RuleType(util.RandomRule()),
 	}
 
-	updated_target_country, err := store.UpdateTargetCountry(context.Background(), update_arg)
+	updated_target_country, err := testStore.UpdateTargetCountry(context.Background(), update_arg)
 	require.NoError(t, err)
 	require.Equal(t, campaign.Cid, updated_target_country.Cid)
 	require.Equal(t, update_arg.Country, updated_target_country.Country)
 	require.Equal(t, update_arg.Rule, updated_target_country.Rule)
 
-	campaignHistory, err := testQueries.GetLastTwoCampaignHistory(context.Background(), campaign.Cid)
+	campaignHistory, err := testStore.GetLastTwoCampaignHistory(context.Background(), campaign.Cid)
 	require.NoError(t, err)
 
 	for _, history := range campaignHistory {
@@ -561,5 +549,5 @@ func TestUpdateTargetCountry(t *testing.T) {
 		}
 	}
 
-	store.DeleteCampaign(context.Background(), campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), campaign.Cid)
 }

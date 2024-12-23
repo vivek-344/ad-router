@@ -17,7 +17,7 @@ func addRandomTargetOs(t *testing.T, cid string) db.TargetOs {
 		Rule: db.RuleType(util.RandomRule()),
 	}
 
-	target_os, err := testQueries.AddTargetOs(context.Background(), arg)
+	target_os, err := testStore.AddTargetOs(context.Background(), arg)
 	require.NoError(t, err)
 	require.Equal(t, arg.Cid, target_os.Cid)
 	require.Equal(t, arg.Os, target_os.Os)
@@ -29,31 +29,31 @@ func addRandomTargetOs(t *testing.T, cid string) db.TargetOs {
 func TestAddTargetOs(t *testing.T) {
 	campaign := addRandomCampaign(t)
 	addRandomTargetOs(t, campaign.Cid)
-	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), campaign.Cid)
 }
 
 func TestGetTargetOs(t *testing.T) {
 	campaign := addRandomCampaign(t)
 	target_os := addRandomTargetOs(t, campaign.Cid)
 
-	get_target_os, err := testQueries.GetTargetOs(context.Background(), campaign.Cid)
+	get_target_os, err := testStore.GetTargetOs(context.Background(), campaign.Cid)
 	require.NoError(t, err)
 	require.Equal(t, target_os, get_target_os)
 
-	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), campaign.Cid)
 }
 
 func TestDeleteTargetOs(t *testing.T) {
 	campaign := addRandomCampaign(t)
 	addRandomTargetOs(t, campaign.Cid)
 
-	err := testQueries.DeleteTargetOs(context.Background(), campaign.Cid)
+	err := testStore.DeleteTargetOs(context.Background(), campaign.Cid)
 	require.NoError(t, err)
 
-	target_os, err := testQueries.GetTargetOs(context.Background(), campaign.Cid)
+	target_os, err := testStore.GetTargetOs(context.Background(), campaign.Cid)
 	require.Error(t, err)
 	require.EqualError(t, err, pgx.ErrNoRows.Error())
 	require.Empty(t, target_os)
 
-	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), campaign.Cid)
 }

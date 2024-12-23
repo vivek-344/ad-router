@@ -2,12 +2,14 @@ package db
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
 type Store interface {
@@ -26,13 +28,15 @@ type Store interface {
 
 type SQLStore struct {
 	*Queries
-	db *pgxpool.Pool
+	db      *pgxpool.Pool
+	rClient *redis.Client
 }
 
-func NewStore(db *pgxpool.Pool) Store {
+func NewStore(db *pgxpool.Pool, rClient *redis.Client) Store {
 	return &SQLStore{
 		db:      db,
 		Queries: New(db),
+		rClient: rClient,
 	}
 }
 
@@ -94,16 +98,177 @@ type DeliveryResult struct {
 	Cta string `json:"cta"`
 }
 
-func (store *SQLStore) Delivery(ctx context.Context, arg DeliveryParams) ([]DeliveryResult, error) {
+// Helper functions for caching query results
+
+func (store *SQLStore) getCachedActiveCampaigns(ctx context.Context) ([]Campaign, error) {
+	cacheKey := "active_campaigns"
 	var campaigns []Campaign
-	var result []DeliveryResult
-	active_campaigns, err := store.ListActiveCampaigns(ctx)
+
+	cachedData, err := store.rClient.Get(ctx, cacheKey).Bytes()
+	if err == nil {
+		err = json.Unmarshal(cachedData, &campaigns)
+		if err == nil {
+			return campaigns, nil
+		}
+		fmt.Printf("Redis JSON unmarshal error for active campaigns: %v\n", err)
+	} else if err != redis.Nil {
+		fmt.Printf("Redis Get error for active campaigns: %v\n", err)
+	}
+
+	campaigns, err = store.ListActiveCampaigns(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(campaigns) > 0 {
+		jsonData, err := json.Marshal(campaigns)
+		if err != nil {
+			fmt.Printf("JSON marshal error for active campaigns: %v\n", err)
+		} else {
+			err = store.rClient.Set(ctx, cacheKey, jsonData, 15*time.Minute).Err()
+			if err != nil {
+				fmt.Printf("Redis Set error for active campaigns: %v\n", err)
+			}
+		}
+	}
+
+	return campaigns, nil
+}
+
+func (store *SQLStore) getCachedTargetApp(ctx context.Context, cid string) (*TargetApp, error) {
+	cacheKey := fmt.Sprintf("target_app:%s", cid)
+	var targetApp TargetApp
+
+	cachedData, err := store.rClient.Get(ctx, cacheKey).Bytes()
+	if err == nil {
+		err = json.Unmarshal(cachedData, &targetApp)
+		if err == nil {
+			return &targetApp, nil
+		}
+		fmt.Printf("Redis JSON unmarshal error for target app: %v\n", err)
+	} else if err != redis.Nil {
+		fmt.Printf("Redis Get error for target app: %v\n", err)
+	}
+
+	result, err := store.GetTargetApp(ctx, cid)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			store.rClient.Set(ctx, cacheKey, "null", 15*time.Minute)
+			return nil, err
+		}
+		return nil, err
+	}
+
+	jsonData, err := json.Marshal(result)
+	if err != nil {
+		fmt.Printf("JSON marshal error for target app: %v\n", err)
+	} else {
+		err = store.rClient.Set(ctx, cacheKey, jsonData, 15*time.Minute).Err()
+		if err != nil {
+			fmt.Printf("Redis Set error for target app: %v\n", err)
+		}
+	}
+
+	return &result, nil
+}
+
+func (store *SQLStore) getCachedTargetCountry(ctx context.Context, cid string) (*TargetCountry, error) {
+	cacheKey := fmt.Sprintf("target_country:%s", cid)
+	var targetCountry TargetCountry
+
+	cachedData, err := store.rClient.Get(ctx, cacheKey).Bytes()
+	if err == nil {
+		err = json.Unmarshal(cachedData, &targetCountry)
+		if err == nil {
+			return &targetCountry, nil
+		}
+		fmt.Printf("Redis JSON unmarshal error for target country: %v\n", err)
+	} else if err != redis.Nil {
+		fmt.Printf("Redis Get error for target country: %v\n", err)
+	}
+
+	result, err := store.GetTargetCountry(ctx, cid)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			store.rClient.Set(ctx, cacheKey, "null", 15*time.Minute)
+			return nil, err
+		}
+		return nil, err
+	}
+
+	jsonData, err := json.Marshal(result)
+	if err != nil {
+		fmt.Printf("JSON marshal error for target country: %v\n", err)
+	} else {
+		err = store.rClient.Set(ctx, cacheKey, jsonData, 15*time.Minute).Err()
+		if err != nil {
+			fmt.Printf("Redis Set error for target country: %v\n", err)
+		}
+	}
+
+	return &result, nil
+}
+
+func (store *SQLStore) getCachedTargetOs(ctx context.Context, cid string) (*TargetOs, error) {
+	cacheKey := fmt.Sprintf("target_os:%s", cid)
+	var targetOs TargetOs
+
+	cachedData, err := store.rClient.Get(ctx, cacheKey).Bytes()
+	if err == nil {
+		err = json.Unmarshal(cachedData, &targetOs)
+		if err == nil {
+			return &targetOs, nil
+		}
+		fmt.Printf("Redis JSON unmarshal error for target os: %v\n", err)
+	} else if err != redis.Nil {
+		fmt.Printf("Redis Get error for target os: %v\n", err)
+	}
+
+	result, err := store.GetTargetOs(ctx, cid)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			store.rClient.Set(ctx, cacheKey, "null", 15*time.Minute)
+			return nil, err
+		}
+		return nil, err
+	}
+
+	jsonData, err := json.Marshal(result)
+	if err != nil {
+		fmt.Printf("JSON marshal error for target os: %v\n", err)
+	} else {
+		err = store.rClient.Set(ctx, cacheKey, jsonData, 15*time.Minute).Err()
+		if err != nil {
+			fmt.Printf("Redis Set error for target os: %v\n", err)
+		}
+	}
+
+	return &result, nil
+}
+
+func (store *SQLStore) Delivery(ctx context.Context, arg DeliveryParams) ([]DeliveryResult, error) {
+	cacheKey := fmt.Sprintf("delivery:%s:%s:%s", arg.AppID, arg.Country, arg.Os)
+	var results []DeliveryResult
+
+	cachedData, err := store.rClient.Get(ctx, cacheKey).Bytes()
+	if err == nil {
+		err = json.Unmarshal(cachedData, &results)
+		if err == nil {
+			return results, nil
+		}
+		fmt.Printf("Redis JSON unmarshal error: %v\n", err)
+	} else if err != redis.Nil {
+		fmt.Printf("Redis Get error: %v\n", err)
+	}
+
+	active_campaigns, err := store.getCachedActiveCampaigns(ctx)
 	if err != nil {
 		return []DeliveryResult{}, err
 	}
 
+	var campaigns []Campaign
 	for _, campaign := range active_campaigns {
-		target_app, err := store.GetTargetApp(ctx, campaign.Cid)
+		target_app, err := store.getCachedTargetApp(ctx, campaign.Cid)
 		if err != nil && err != pgx.ErrNoRows {
 			return []DeliveryResult{}, err
 		}
@@ -113,7 +278,7 @@ func (store *SQLStore) Delivery(ctx context.Context, arg DeliveryParams) ([]Deli
 			}
 		}
 
-		target_country, err := store.GetTargetCountry(ctx, campaign.Cid)
+		target_country, err := store.getCachedTargetCountry(ctx, campaign.Cid)
 		if err != nil && err != pgx.ErrNoRows {
 			return []DeliveryResult{}, err
 		}
@@ -123,7 +288,7 @@ func (store *SQLStore) Delivery(ctx context.Context, arg DeliveryParams) ([]Deli
 			}
 		}
 
-		target_os, err := store.GetTargetOs(ctx, campaign.Cid)
+		target_os, err := store.getCachedTargetOs(ctx, campaign.Cid)
 		if err != nil && err != pgx.ErrNoRows {
 			return []DeliveryResult{}, err
 		}
@@ -136,12 +301,25 @@ func (store *SQLStore) Delivery(ctx context.Context, arg DeliveryParams) ([]Deli
 		campaigns = append(campaigns, campaign)
 	}
 
+	var result []DeliveryResult
 	for _, campaign := range campaigns {
 		result = append(result, DeliveryResult{
 			Cid: campaign.Cid,
 			Img: campaign.Img,
 			Cta: campaign.Cta,
 		})
+	}
+
+	if len(result) > 0 {
+		jsonData, err := json.Marshal(result)
+		if err != nil {
+			fmt.Printf("JSON marshal error: %v\n", err)
+		} else {
+			err = store.rClient.Set(ctx, cacheKey, jsonData, 30*time.Minute).Err()
+			if err != nil {
+				fmt.Printf("Redis Set error: %v\n", err)
+			}
+		}
 	}
 
 	return result, nil

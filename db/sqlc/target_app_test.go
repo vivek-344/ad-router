@@ -17,7 +17,7 @@ func addRandomTargetApp(t *testing.T, cid string) db.TargetApp {
 		Rule:  db.RuleType(util.RandomRule()),
 	}
 
-	target_app, err := testQueries.AddTargetApp(context.Background(), arg)
+	target_app, err := testStore.AddTargetApp(context.Background(), arg)
 	require.NoError(t, err)
 	require.Equal(t, arg.Cid, target_app.Cid)
 	require.Equal(t, arg.AppID, target_app.AppID)
@@ -29,31 +29,31 @@ func addRandomTargetApp(t *testing.T, cid string) db.TargetApp {
 func TestAddTargetApp(t *testing.T) {
 	campaign := addRandomCampaign(t)
 	addRandomTargetApp(t, campaign.Cid)
-	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), campaign.Cid)
 }
 
 func TestGetTargetApp(t *testing.T) {
 	campaign := addRandomCampaign(t)
 	target_app := addRandomTargetApp(t, campaign.Cid)
 
-	get_target_app, err := testQueries.GetTargetApp(context.Background(), campaign.Cid)
+	get_target_app, err := testStore.GetTargetApp(context.Background(), campaign.Cid)
 	require.NoError(t, err)
 	require.Equal(t, target_app, get_target_app)
 
-	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), campaign.Cid)
 }
 
 func TestDeleteTargetApp(t *testing.T) {
 	campaign := addRandomCampaign(t)
 	addRandomTargetApp(t, campaign.Cid)
 
-	err := testQueries.DeleteTargetApp(context.Background(), campaign.Cid)
+	err := testStore.DeleteTargetApp(context.Background(), campaign.Cid)
 	require.NoError(t, err)
 
-	target_app, err := testQueries.GetTargetApp(context.Background(), campaign.Cid)
+	target_app, err := testStore.GetTargetApp(context.Background(), campaign.Cid)
 	require.Error(t, err)
 	require.EqualError(t, err, pgx.ErrNoRows.Error())
 	require.Empty(t, target_app)
 
-	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), campaign.Cid)
 }

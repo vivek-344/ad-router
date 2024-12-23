@@ -17,7 +17,7 @@ func addRandomTargetCountry(t *testing.T, cid string) db.TargetCountry {
 		Rule:    db.RuleType(util.RandomRule()),
 	}
 
-	target_country, err := testQueries.AddTargetCountry(context.Background(), arg)
+	target_country, err := testStore.AddTargetCountry(context.Background(), arg)
 	require.NoError(t, err)
 	require.Equal(t, arg.Cid, target_country.Cid)
 	require.Equal(t, arg.Country, target_country.Country)
@@ -29,31 +29,31 @@ func addRandomTargetCountry(t *testing.T, cid string) db.TargetCountry {
 func TestAddTargetCountry(t *testing.T) {
 	campaign := addRandomCampaign(t)
 	addRandomTargetCountry(t, campaign.Cid)
-	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), campaign.Cid)
 }
 
 func TestGetTargetCountry(t *testing.T) {
 	campaign := addRandomCampaign(t)
 	target_country := addRandomTargetCountry(t, campaign.Cid)
 
-	get_target_country, err := testQueries.GetTargetCountry(context.Background(), campaign.Cid)
+	get_target_country, err := testStore.GetTargetCountry(context.Background(), campaign.Cid)
 	require.NoError(t, err)
 	require.Equal(t, target_country, get_target_country)
 
-	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), campaign.Cid)
 }
 
 func TestDeleteTargetCountry(t *testing.T) {
 	campaign := addRandomCampaign(t)
 	addRandomTargetCountry(t, campaign.Cid)
 
-	err := testQueries.DeleteTargetCountry(context.Background(), campaign.Cid)
+	err := testStore.DeleteTargetCountry(context.Background(), campaign.Cid)
 	require.NoError(t, err)
 
-	target_country, err := testQueries.GetTargetCountry(context.Background(), campaign.Cid)
+	target_country, err := testStore.GetTargetCountry(context.Background(), campaign.Cid)
 	require.Error(t, err)
 	require.EqualError(t, err, pgx.ErrNoRows.Error())
 	require.Empty(t, target_country)
 
-	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
+	testStore.DeleteCampaign(context.Background(), campaign.Cid)
 }
