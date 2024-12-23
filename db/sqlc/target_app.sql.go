@@ -9,7 +9,7 @@ import (
 	"context"
 )
 
-const createTargetApp = `-- name: CreateTargetApp :one
+const addTargetApp = `-- name: AddTargetApp :one
 INSERT INTO target_app (
     cid,
     app_id,
@@ -20,14 +20,14 @@ INSERT INTO target_app (
 RETURNING cid, app_id, rule
 `
 
-type CreateTargetAppParams struct {
+type AddTargetAppParams struct {
 	Cid   string   `json:"cid"`
 	AppID string   `json:"app_id"`
 	Rule  RuleType `json:"rule"`
 }
 
-func (q *Queries) CreateTargetApp(ctx context.Context, arg CreateTargetAppParams) (TargetApp, error) {
-	row := q.db.QueryRow(ctx, createTargetApp, arg.Cid, arg.AppID, arg.Rule)
+func (q *Queries) AddTargetApp(ctx context.Context, arg AddTargetAppParams) (TargetApp, error) {
+	row := q.db.QueryRow(ctx, addTargetApp, arg.Cid, arg.AppID, arg.Rule)
 	var i TargetApp
 	err := row.Scan(&i.Cid, &i.AppID, &i.Rule)
 	return i, err

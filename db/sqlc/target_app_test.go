@@ -10,14 +10,14 @@ import (
 	"github.com/vivek-344/AdRouter/util"
 )
 
-func createRandomTargetApp(t *testing.T, cid string) db.TargetApp {
-	arg := db.CreateTargetAppParams{
+func addRandomTargetApp(t *testing.T, cid string) db.TargetApp {
+	arg := db.AddTargetAppParams{
 		Cid:   cid,
 		AppID: util.RandomAppID(),
 		Rule:  db.RuleType(util.RandomRule()),
 	}
 
-	target_app, err := testQueries.CreateTargetApp(context.Background(), arg)
+	target_app, err := testQueries.AddTargetApp(context.Background(), arg)
 	require.NoError(t, err)
 	require.Equal(t, arg.Cid, target_app.Cid)
 	require.Equal(t, arg.AppID, target_app.AppID)
@@ -26,15 +26,15 @@ func createRandomTargetApp(t *testing.T, cid string) db.TargetApp {
 	return target_app
 }
 
-func TestCreateTargetApp(t *testing.T) {
-	campaign := createRandomCampaign(t)
-	createRandomTargetApp(t, campaign.Cid)
+func TestAddTargetApp(t *testing.T) {
+	campaign := addRandomCampaign(t)
+	addRandomTargetApp(t, campaign.Cid)
 	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
 }
 
 func TestGetTargetApp(t *testing.T) {
-	campaign := createRandomCampaign(t)
-	target_app := createRandomTargetApp(t, campaign.Cid)
+	campaign := addRandomCampaign(t)
+	target_app := addRandomTargetApp(t, campaign.Cid)
 
 	get_target_app, err := testQueries.GetTargetApp(context.Background(), campaign.Cid)
 	require.NoError(t, err)
@@ -44,8 +44,8 @@ func TestGetTargetApp(t *testing.T) {
 }
 
 func TestDeleteTargetApp(t *testing.T) {
-	campaign := createRandomCampaign(t)
-	createRandomTargetApp(t, campaign.Cid)
+	campaign := addRandomCampaign(t)
+	addRandomTargetApp(t, campaign.Cid)
 
 	err := testQueries.DeleteTargetApp(context.Background(), campaign.Cid)
 	require.NoError(t, err)

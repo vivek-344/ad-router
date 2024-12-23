@@ -9,23 +9,23 @@ import (
 )
 
 type Querier interface {
-	CreateCampaign(ctx context.Context, arg CreateCampaignParams) (Campaign, error)
-	CreateTargetApp(ctx context.Context, arg CreateTargetAppParams) (TargetApp, error)
-	CreateTargetCountry(ctx context.Context, arg CreateTargetCountryParams) (TargetCountry, error)
-	CreateTargetOs(ctx context.Context, arg CreateTargetOsParams) (TargetOs, error)
+	AddCampaign(ctx context.Context, arg AddCampaignParams) (Campaign, error)
+	AddTargetApp(ctx context.Context, arg AddTargetAppParams) (TargetApp, error)
+	AddTargetCountry(ctx context.Context, arg AddTargetCountryParams) (TargetCountry, error)
+	AddTargetOs(ctx context.Context, arg AddTargetOsParams) (TargetOs, error)
 	DeleteCampaign(ctx context.Context, cid string) error
 	DeleteTargetApp(ctx context.Context, cid string) error
 	DeleteTargetCountry(ctx context.Context, cid string) error
 	DeleteTargetOs(ctx context.Context, cid string) error
-	GetAllCampaignHistory(ctx context.Context, cid string) ([]CampaignHistory, error)
 	GetCampaign(ctx context.Context, cid string) (Campaign, error)
 	GetCampaignHistory(ctx context.Context, cid string) (CampaignHistory, error)
 	GetLastTwoCampaignHistory(ctx context.Context, cid string) ([]CampaignHistory, error)
 	GetTargetApp(ctx context.Context, cid string) (TargetApp, error)
 	GetTargetCountry(ctx context.Context, cid string) (TargetCountry, error)
 	GetTargetOs(ctx context.Context, cid string) (TargetOs, error)
-	ListAllActiveCampaign(ctx context.Context) ([]Campaign, error)
-	ListAllCampaign(ctx context.Context) ([]Campaign, error)
+	ListActiveCampaigns(ctx context.Context) ([]Campaign, error)
+	ListCampaignHistory(ctx context.Context, cid string) ([]CampaignHistory, error)
+	ListCampaigns(ctx context.Context) ([]Campaign, error)
 	createCampaignHistory(ctx context.Context, arg createCampaignHistoryParams) error
 	toggleStatus(ctx context.Context, cid string) (StatusType, error)
 	updateCampaignCta(ctx context.Context, arg updateCampaignCtaParams) (Campaign, error)

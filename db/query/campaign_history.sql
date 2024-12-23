@@ -22,7 +22,7 @@ WHERE cid = $1
 ORDER BY updated_at DESC
 LIMIT 2;
 
--- name: GetAllCampaignHistory :many
+-- name: ListCampaignHistory :many
 SELECT *
 FROM campaign_history
 WHERE cid = $1

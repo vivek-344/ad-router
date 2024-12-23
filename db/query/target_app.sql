@@ -1,4 +1,4 @@
--- name: CreateTargetApp :one
+-- name: AddTargetApp :one
 INSERT INTO target_app (
     cid,
     app_id,

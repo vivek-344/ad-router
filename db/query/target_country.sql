@@ -1,4 +1,4 @@
--- name: CreateTargetCountry :one
+-- name: AddTargetCountry :one
 INSERT INTO target_country (
     cid,
     country,

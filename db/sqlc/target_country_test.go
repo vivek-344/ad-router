@@ -10,14 +10,14 @@ import (
 	"github.com/vivek-344/AdRouter/util"
 )
 
-func createRandomTargetCountry(t *testing.T, cid string) db.TargetCountry {
-	arg := db.CreateTargetCountryParams{
+func addRandomTargetCountry(t *testing.T, cid string) db.TargetCountry {
+	arg := db.AddTargetCountryParams{
 		Cid:     cid,
 		Country: util.RandomCountry(),
 		Rule:    db.RuleType(util.RandomRule()),
 	}
 
-	target_country, err := testQueries.CreateTargetCountry(context.Background(), arg)
+	target_country, err := testQueries.AddTargetCountry(context.Background(), arg)
 	require.NoError(t, err)
 	require.Equal(t, arg.Cid, target_country.Cid)
 	require.Equal(t, arg.Country, target_country.Country)
@@ -26,15 +26,15 @@ func createRandomTargetCountry(t *testing.T, cid string) db.TargetCountry {
 	return target_country
 }
 
-func TestCreateTargetCountry(t *testing.T) {
-	campaign := createRandomCampaign(t)
-	createRandomTargetCountry(t, campaign.Cid)
+func TestAddTargetCountry(t *testing.T) {
+	campaign := addRandomCampaign(t)
+	addRandomTargetCountry(t, campaign.Cid)
 	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
 }
 
 func TestGetTargetCountry(t *testing.T) {
-	campaign := createRandomCampaign(t)
-	target_country := createRandomTargetCountry(t, campaign.Cid)
+	campaign := addRandomCampaign(t)
+	target_country := addRandomTargetCountry(t, campaign.Cid)
 
 	get_target_country, err := testQueries.GetTargetCountry(context.Background(), campaign.Cid)
 	require.NoError(t, err)
@@ -44,8 +44,8 @@ func TestGetTargetCountry(t *testing.T) {
 }
 
 func TestDeleteTargetCountry(t *testing.T) {
-	campaign := createRandomCampaign(t)
-	createRandomTargetCountry(t, campaign.Cid)
+	campaign := addRandomCampaign(t)
+	addRandomTargetCountry(t, campaign.Cid)
 
 	err := testQueries.DeleteTargetCountry(context.Background(), campaign.Cid)
 	require.NoError(t, err)

@@ -9,7 +9,7 @@ import (
 	"context"
 )
 
-const createTargetOs = `-- name: CreateTargetOs :one
+const addTargetOs = `-- name: AddTargetOs :one
 INSERT INTO target_os (
     cid,
     os,
@@ -20,14 +20,14 @@ INSERT INTO target_os (
 RETURNING cid, os, rule
 `
 
-type CreateTargetOsParams struct {
+type AddTargetOsParams struct {
 	Cid  string   `json:"cid"`
 	Os   string   `json:"os"`
 	Rule RuleType `json:"rule"`
 }
 
-func (q *Queries) CreateTargetOs(ctx context.Context, arg CreateTargetOsParams) (TargetOs, error) {
-	row := q.db.QueryRow(ctx, createTargetOs, arg.Cid, arg.Os, arg.Rule)
+func (q *Queries) AddTargetOs(ctx context.Context, arg AddTargetOsParams) (TargetOs, error) {
+	row := q.db.QueryRow(ctx, addTargetOs, arg.Cid, arg.Os, arg.Rule)
 	var i TargetOs
 	err := row.Scan(&i.Cid, &i.Os, &i.Rule)
 	return i, err

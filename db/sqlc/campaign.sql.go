@@ -9,7 +9,7 @@ import (
 	"context"
 )
 
-const createCampaign = `-- name: CreateCampaign :one
+const addCampaign = `-- name: AddCampaign :one
 INSERT INTO campaign (
   cid,
   name,
@@ -21,15 +21,15 @@ INSERT INTO campaign (
 RETURNING cid, name, img, cta, status, created_at
 `
 
-type CreateCampaignParams struct {
+type AddCampaignParams struct {
 	Cid  string `json:"cid"`
 	Name string `json:"name"`
 	Img  string `json:"img"`
 	Cta  string `json:"cta"`
 }
 
-func (q *Queries) CreateCampaign(ctx context.Context, arg CreateCampaignParams) (Campaign, error) {
-	row := q.db.QueryRow(ctx, createCampaign,
+func (q *Queries) AddCampaign(ctx context.Context, arg AddCampaignParams) (Campaign, error) {
+	row := q.db.QueryRow(ctx, addCampaign,
 		arg.Cid,
 		arg.Name,
 		arg.Img,
@@ -77,14 +77,14 @@ func (q *Queries) GetCampaign(ctx context.Context, cid string) (Campaign, error)
 	return i, err
 }
 
-const listAllActiveCampaign = `-- name: ListAllActiveCampaign :many
+const listActiveCampaigns = `-- name: ListActiveCampaigns :many
 SELECT cid, name, img, cta, status, created_at
 FROM campaign
 WHERE status = 'active'::status_type
 `
 
-func (q *Queries) ListAllActiveCampaign(ctx context.Context) ([]Campaign, error) {
-	rows, err := q.db.Query(ctx, listAllActiveCampaign)
+func (q *Queries) ListActiveCampaigns(ctx context.Context) ([]Campaign, error) {
+	rows, err := q.db.Query(ctx, listActiveCampaigns)
 	if err != nil {
 		return nil, err
 	}
@@ -110,13 +110,13 @@ func (q *Queries) ListAllActiveCampaign(ctx context.Context) ([]Campaign, error)
 	return items, nil
 }
 
-const listAllCampaign = `-- name: ListAllCampaign :many
+const listCampaigns = `-- name: ListCampaigns :many
 SELECT cid, name, img, cta, status, created_at
 FROM campaign
 `
 
-func (q *Queries) ListAllCampaign(ctx context.Context) ([]Campaign, error) {
-	rows, err := q.db.Query(ctx, listAllCampaign)
+func (q *Queries) ListCampaigns(ctx context.Context) ([]Campaign, error) {
+	rows, err := q.db.Query(ctx, listCampaigns)
 	if err != nil {
 		return nil, err
 	}

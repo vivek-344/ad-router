@@ -13,7 +13,7 @@ import (
 type Store interface {
 	Querier
 	Delivery(ctx context.Context, arg DeliveryParams) ([]DeliveryResult, error)
-	AddCampaign(tx context.Context, arg AddCampaignParams) (AddCampaignResult, error)
+	CreateCampaign(tx context.Context, arg CreateCampaignParams) (CreateCampaignResult, error)
 	ReadCampaign(ctx context.Context, cid string) (CompleteCampaign, error)
 	ToggleStatus(ctx context.Context, cid string) error
 	UpdateCampaignName(ctx context.Context, arg UpdateCampaignNameParams) (Campaign, error)
@@ -97,7 +97,7 @@ type DeliveryResult struct {
 func (store *SQLStore) Delivery(ctx context.Context, arg DeliveryParams) ([]DeliveryResult, error) {
 	var campaigns []Campaign
 	var result []DeliveryResult
-	active_campaigns, err := store.ListAllActiveCampaign(ctx)
+	active_campaigns, err := store.ListActiveCampaigns(ctx)
 	if err != nil {
 		return []DeliveryResult{}, err
 	}
@@ -147,7 +147,7 @@ func (store *SQLStore) Delivery(ctx context.Context, arg DeliveryParams) ([]Deli
 	return result, nil
 }
 
-type AddCampaignParams struct {
+type CreateCampaignParams struct {
 	Cid         string   `json:"cid"`
 	Name        string   `json:"name"`
 	Img         string   `json:"img"`
@@ -160,7 +160,7 @@ type AddCampaignParams struct {
 	OsRule      RuleType `json:"os_rule"`
 }
 
-type AddCampaignResult struct {
+type CreateCampaignResult struct {
 	Cid         string     `json:"cid"`
 	Name        string     `json:"name"`
 	Img         string     `json:"img"`
@@ -175,11 +175,11 @@ type AddCampaignResult struct {
 	CreatedAt   time.Time  `json:"created_at"`
 }
 
-func (store *SQLStore) AddCampaign(ctx context.Context, arg AddCampaignParams) (AddCampaignResult, error) {
-	var result AddCampaignResult
+func (store *SQLStore) CreateCampaign(ctx context.Context, arg CreateCampaignParams) (CreateCampaignResult, error) {
+	var result CreateCampaignResult
 
 	err := store.execTx(ctx, func(q *Queries) error {
-		campaign, err := q.CreateCampaign(ctx, CreateCampaignParams{
+		campaign, err := q.AddCampaign(ctx, AddCampaignParams{
 			Cid:  arg.Cid,
 			Name: arg.Name,
 			Img:  arg.Img,
@@ -189,7 +189,7 @@ func (store *SQLStore) AddCampaign(ctx context.Context, arg AddCampaignParams) (
 			return err
 		}
 
-		result = AddCampaignResult{
+		result = CreateCampaignResult{
 			Cid:       campaign.Cid,
 			Name:      campaign.Name,
 			Img:       campaign.Img,
@@ -199,7 +199,7 @@ func (store *SQLStore) AddCampaign(ctx context.Context, arg AddCampaignParams) (
 		}
 
 		if arg.AppID != "" {
-			targetApp, err := q.CreateTargetApp(ctx, CreateTargetAppParams{
+			targetApp, err := q.AddTargetApp(ctx, AddTargetAppParams{
 				Cid:   arg.Cid,
 				AppID: arg.AppID,
 				Rule:  arg.AppRule,
@@ -212,7 +212,7 @@ func (store *SQLStore) AddCampaign(ctx context.Context, arg AddCampaignParams) (
 		}
 
 		if arg.Country != "" {
-			targetCountry, err := q.CreateTargetCountry(ctx, CreateTargetCountryParams{
+			targetCountry, err := q.AddTargetCountry(ctx, AddTargetCountryParams{
 				Cid:     arg.Cid,
 				Country: arg.Country,
 				Rule:    arg.CountryRule,
@@ -225,7 +225,7 @@ func (store *SQLStore) AddCampaign(ctx context.Context, arg AddCampaignParams) (
 		}
 
 		if arg.Os != "" {
-			targetOs, err := q.CreateTargetOs(ctx, CreateTargetOsParams{
+			targetOs, err := q.AddTargetOs(ctx, AddTargetOsParams{
 				Cid:  arg.Cid,
 				Os:   arg.Os,
 				Rule: arg.OsRule,

@@ -14,31 +14,31 @@ func TestDelivery(t *testing.T) {
 
 	campaigns := make([]db.Campaign, 3)
 
-	campaigns[0] = createRandomCampaign(t)
-	arg1 := db.CreateTargetAppParams{
+	campaigns[0] = addRandomCampaign(t)
+	arg1 := db.AddTargetAppParams{
 		Cid:   campaigns[0].Cid,
 		AppID: "app1,app2,app3",
 		Rule:  "include",
 	}
-	_, err := store.CreateTargetApp(context.Background(), arg1)
+	_, err := store.AddTargetApp(context.Background(), arg1)
 	require.NoError(t, err)
 
-	campaigns[1] = createRandomCampaign(t)
-	arg2 := db.CreateTargetCountryParams{
+	campaigns[1] = addRandomCampaign(t)
+	arg2 := db.AddTargetCountryParams{
 		Cid:     campaigns[1].Cid,
 		Country: "US,UK,CA",
 		Rule:    "exclude",
 	}
-	_, err = store.CreateTargetCountry(context.Background(), arg2)
+	_, err = store.AddTargetCountry(context.Background(), arg2)
 	require.NoError(t, err)
 
-	campaigns[2] = createRandomCampaign(t)
-	arg3 := db.CreateTargetOsParams{
+	campaigns[2] = addRandomCampaign(t)
+	arg3 := db.AddTargetOsParams{
 		Cid:  campaigns[2].Cid,
 		Os:   "android,ios",
 		Rule: "include",
 	}
-	_, err = store.CreateTargetOs(context.Background(), arg3)
+	_, err = store.AddTargetOs(context.Background(), arg3)
 	require.NoError(t, err)
 
 	testCases := []struct {
@@ -136,15 +136,15 @@ func extractCids(results []db.DeliveryResult) []string {
 	return cids
 }
 
-func createRandomCampaign(t *testing.T) db.Campaign {
-	arg := db.CreateCampaignParams{
+func addRandomCampaign(t *testing.T) db.Campaign {
+	arg := db.AddCampaignParams{
 		Cid:  util.RandomCid(),
 		Name: util.RandomName(),
 		Img:  util.RandomImg(),
 		Cta:  util.RandomCta(),
 	}
 
-	campaign, err := testQueries.CreateCampaign(context.Background(), arg)
+	campaign, err := testQueries.AddCampaign(context.Background(), arg)
 	require.NoError(t, err)
 	require.Equal(t, arg.Cid, campaign.Cid)
 	require.Equal(t, arg.Name, campaign.Name)
@@ -156,10 +156,10 @@ func createRandomCampaign(t *testing.T) db.Campaign {
 	return campaign
 }
 
-func createRandomCompleteCampaign(t *testing.T) db.AddCampaignResult {
+func createRandomCampaign(t *testing.T) db.CreateCampaignResult {
 	store := db.NewStore(testDB)
 
-	arg := db.AddCampaignParams{
+	arg := db.CreateCampaignParams{
 		Cid:  util.RandomCid(),
 		Name: util.RandomName(),
 		Img:  util.RandomImg(),
@@ -178,7 +178,7 @@ func createRandomCompleteCampaign(t *testing.T) db.AddCampaignResult {
 		arg.OsRule = db.RuleType(util.RandomRule())
 	}
 
-	campaign, err := store.AddCampaign(context.Background(), arg)
+	campaign, err := store.CreateCampaign(context.Background(), arg)
 	require.NoError(t, err)
 	require.Equal(t, arg.Cid, campaign.Cid)
 	require.Equal(t, arg.Name, campaign.Name)
@@ -196,14 +196,14 @@ func createRandomCompleteCampaign(t *testing.T) db.AddCampaignResult {
 	return campaign
 }
 
-func TestAddCampaign(t *testing.T) {
-	campaign := createRandomCompleteCampaign(t)
+func TestCreateCampaign(t *testing.T) {
+	campaign := createRandomCampaign(t)
 	testQueries.DeleteCampaign(context.Background(), campaign.Cid)
 }
 
 func TestReadCampaign(t *testing.T) {
 	store := db.NewStore(testDB)
-	campaign := createRandomCompleteCampaign(t)
+	campaign := createRandomCampaign(t)
 	read_campaign, err := store.ReadCampaign(context.Background(), campaign.Cid)
 	require.NoError(t, err)
 
@@ -225,7 +225,7 @@ func TestReadCampaign(t *testing.T) {
 
 func TestToggleStatus(t *testing.T) {
 	store := db.NewStore(testDB)
-	old_campaign := createRandomCampaign(t)
+	old_campaign := addRandomCampaign(t)
 
 	err := store.ToggleStatus(context.Background(), old_campaign.Cid)
 	require.NoError(t, err)
@@ -275,7 +275,7 @@ func TestToggleStatus(t *testing.T) {
 
 func TestUpdateCampaignName(t *testing.T) {
 	store := db.NewStore(testDB)
-	old_campaign := createRandomCampaign(t)
+	old_campaign := addRandomCampaign(t)
 
 	var newName string
 	for {
@@ -313,7 +313,7 @@ func TestUpdateCampaignName(t *testing.T) {
 
 func TestUpdateCampaignCta(t *testing.T) {
 	store := db.NewStore(testDB)
-	old_campaign := createRandomCampaign(t)
+	old_campaign := addRandomCampaign(t)
 
 	var newCta string
 	for {
@@ -351,7 +351,7 @@ func TestUpdateCampaignCta(t *testing.T) {
 
 func TestUpdateCampaignImage(t *testing.T) {
 	store := db.NewStore(testDB)
-	old_campaign := createRandomCampaign(t)
+	old_campaign := addRandomCampaign(t)
 
 	var newImg string
 	for {
@@ -389,15 +389,15 @@ func TestUpdateCampaignImage(t *testing.T) {
 
 func TestUpdateTargetApp(t *testing.T) {
 	store := db.NewStore(testDB)
-	campaign := createRandomCampaign(t)
+	campaign := addRandomCampaign(t)
 
-	new_arg := db.CreateTargetAppParams{
+	new_arg := db.AddTargetAppParams{
 		Cid:   campaign.Cid,
 		AppID: util.RandomAppID(),
 		Rule:  db.RuleType(util.RandomRule()),
 	}
 
-	old_target_app, err := store.CreateTargetApp(context.Background(), new_arg)
+	old_target_app, err := store.AddTargetApp(context.Background(), new_arg)
 	require.NoError(t, err)
 	require.Equal(t, new_arg.Cid, old_target_app.Cid)
 	require.Equal(t, new_arg.AppID, old_target_app.AppID)
@@ -448,15 +448,15 @@ func TestUpdateTargetApp(t *testing.T) {
 
 func TestUpdateTargetOs(t *testing.T) {
 	store := db.NewStore(testDB)
-	campaign := createRandomCampaign(t)
+	campaign := addRandomCampaign(t)
 
-	new_arg := db.CreateTargetOsParams{
+	new_arg := db.AddTargetOsParams{
 		Cid:  campaign.Cid,
 		Os:   util.RandomOs(),
 		Rule: db.RuleType(util.RandomRule()),
 	}
 
-	old_target_os, err := store.CreateTargetOs(context.Background(), new_arg)
+	old_target_os, err := store.AddTargetOs(context.Background(), new_arg)
 	require.NoError(t, err)
 	require.Equal(t, new_arg.Cid, old_target_os.Cid)
 	require.Equal(t, new_arg.Os, old_target_os.Os)
@@ -507,15 +507,15 @@ func TestUpdateTargetOs(t *testing.T) {
 
 func TestUpdateTargetCountry(t *testing.T) {
 	store := db.NewStore(testDB)
-	campaign := createRandomCampaign(t)
+	campaign := addRandomCampaign(t)
 
-	new_arg := db.CreateTargetCountryParams{
+	new_arg := db.AddTargetCountryParams{
 		Cid:     campaign.Cid,
 		Country: util.RandomCountry(),
 		Rule:    db.RuleType(util.RandomRule()),
 	}
 
-	old_target_country, err := store.CreateTargetCountry(context.Background(), new_arg)
+	old_target_country, err := store.AddTargetCountry(context.Background(), new_arg)
 	require.NoError(t, err)
 	require.Equal(t, new_arg.Cid, old_target_country.Cid)
 	require.Equal(t, new_arg.Country, old_target_country.Country)

@@ -1,4 +1,4 @@
--- name: CreateTargetOs :one
+-- name: AddTargetOs :one
 INSERT INTO target_os (
     cid,
     os,

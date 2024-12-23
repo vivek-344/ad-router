@@ -73,7 +73,7 @@ func (s *Server) createCampaign(ctx *gin.Context) {
 		return
 	}
 
-	campaign, err := s.store.AddCampaign(ctx.Request.Context(), db.AddCampaignParams{
+	campaign, err := s.store.CreateCampaign(ctx.Request.Context(), db.CreateCampaignParams{
 		Cid:         req.Cid,
 		Name:        req.Name,
 		Img:         req.Img,
@@ -158,7 +158,7 @@ func (s *Server) addTargetApp(ctx *gin.Context) {
 		return
 	}
 
-	target_app, err := s.store.CreateTargetApp(ctx.Request.Context(), db.CreateTargetAppParams{
+	target_app, err := s.store.AddTargetApp(ctx.Request.Context(), db.AddTargetAppParams{
 		Cid:   req.Cid,
 		AppID: req.AppID,
 		Rule:  db.RuleType(req.Rule),
@@ -184,7 +184,7 @@ func (s *Server) addTargetCountry(ctx *gin.Context) {
 		return
 	}
 
-	target_country, err := s.store.CreateTargetCountry(ctx.Request.Context(), db.CreateTargetCountryParams{
+	target_country, err := s.store.AddTargetCountry(ctx.Request.Context(), db.AddTargetCountryParams{
 		Cid:     req.Cid,
 		Country: req.Country,
 		Rule:    db.RuleType(req.Rule),
@@ -210,7 +210,7 @@ func (s *Server) addTargetOs(ctx *gin.Context) {
 		return
 	}
 
-	target_os, err := s.store.CreateTargetOs(ctx.Request.Context(), db.CreateTargetOsParams{
+	target_os, err := s.store.AddTargetOs(ctx.Request.Context(), db.AddTargetOsParams{
 		Cid:  req.Cid,
 		Os:   req.Os,
 		Rule: db.RuleType(req.Rule),
@@ -430,7 +430,7 @@ func (s *Server) updateTargetApp(ctx *gin.Context) {
 		return
 	}
 
-	target_app, err := s.store.CreateTargetApp(ctx.Request.Context(), db.CreateTargetAppParams{
+	target_app, err := s.store.AddTargetApp(ctx.Request.Context(), db.AddTargetAppParams{
 		Cid:   req.Cid,
 		AppID: req.AppID,
 		Rule:  db.RuleType(req.AppRule),
@@ -455,7 +455,7 @@ func (s *Server) updateTargetCountry(ctx *gin.Context) {
 		return
 	}
 
-	target_country, err := s.store.CreateTargetCountry(ctx.Request.Context(), db.CreateTargetCountryParams{
+	target_country, err := s.store.AddTargetCountry(ctx.Request.Context(), db.AddTargetCountryParams{
 		Cid:     req.Cid,
 		Country: req.Country,
 		Rule:    db.RuleType(req.CountryRule),
@@ -480,7 +480,7 @@ func (s *Server) updateTargetOs(ctx *gin.Context) {
 		return
 	}
 
-	target_os, err := s.store.CreateTargetOs(ctx.Request.Context(), db.CreateTargetOsParams{
+	target_os, err := s.store.AddTargetOs(ctx.Request.Context(), db.AddTargetOsParams{
 		Cid:  req.Cid,
 		Os:   req.Os,
 		Rule: db.RuleType(req.OsRule),

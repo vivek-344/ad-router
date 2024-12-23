@@ -1,4 +1,4 @@
--- name: CreateCampaign :one
+-- name: AddCampaign :one
 INSERT INTO campaign (
   cid,
   name,
@@ -14,11 +14,11 @@ SELECT *
 FROM campaign
 WHERE cid = $1;
 
--- name: ListAllCampaign :many
+-- name: ListCampaigns :many
 SELECT *
 FROM campaign;
 
--- name: ListAllActiveCampaign :many
+-- name: ListActiveCampaigns :many
 SELECT *
 FROM campaign
 WHERE status = 'active'::status_type;

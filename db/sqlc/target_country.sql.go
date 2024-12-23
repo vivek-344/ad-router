@@ -9,7 +9,7 @@ import (
 	"context"
 )
 
-const createTargetCountry = `-- name: CreateTargetCountry :one
+const addTargetCountry = `-- name: AddTargetCountry :one
 INSERT INTO target_country (
     cid,
     country,
@@ -20,14 +20,14 @@ INSERT INTO target_country (
 RETURNING cid, country, rule
 `
 
-type CreateTargetCountryParams struct {
+type AddTargetCountryParams struct {
 	Cid     string   `json:"cid"`
 	Country string   `json:"country"`
 	Rule    RuleType `json:"rule"`
 }
 
-func (q *Queries) CreateTargetCountry(ctx context.Context, arg CreateTargetCountryParams) (TargetCountry, error) {
-	row := q.db.QueryRow(ctx, createTargetCountry, arg.Cid, arg.Country, arg.Rule)
+func (q *Queries) AddTargetCountry(ctx context.Context, arg AddTargetCountryParams) (TargetCountry, error) {
+	row := q.db.QueryRow(ctx, addTargetCountry, arg.Cid, arg.Country, arg.Rule)
 	var i TargetCountry
 	err := row.Scan(&i.Cid, &i.Country, &i.Rule)
 	return i, err
