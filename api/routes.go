@@ -9,12 +9,43 @@ import (
 	db "github.com/vivek-344/AdRouter/db/sqlc"
 )
 
+type deliveryRequest struct {
+	AppID   string `binding:"required" form:"app"`
+	Country string `binding:"required" form:"country"`
+	Os      string `binding:"required" form:"os"`
+}
+
+func (s *Server) delivery(ctx *gin.Context) {
+	var req deliveryRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	response, err := s.store.Delivery(ctx.Request.Context(), db.DeliveryParams{
+		AppID:   req.AppID,
+		Country: req.Country,
+		Os:      req.Os,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if len(response) == 0 {
+		ctx.JSON(http.StatusNoContent, gin.H{"error": "no campaign available"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response)
+}
+
 type createCampaignRequest struct {
 	Cid         string `binding:"required" json:"cid"`
 	Name        string `binding:"required,min=6,max=32" json:"name"`
 	Img         string `binding:"required" json:"img"`
 	Cta         string `binding:"required" json:"cta"`
-	AppID       string `json:"app_id"`
+	AppID       string `json:"app"`
 	AppRule     string `binding:"omitempty,oneof=include exclude" json:"app_rule"`
 	Country     string `json:"country"`
 	CountryRule string `binding:"omitempty,oneof=include exclude" json:"country_rule"`
@@ -116,7 +147,7 @@ func (s *Server) addCampaign(ctx *gin.Context) {
 
 type addTargetAppRequest struct {
 	Cid   string `binding:"required" json:"cid"`
-	AppID string `binding:"required" json:"app_id"`
+	AppID string `binding:"required" json:"app"`
 	Rule  string `binding:"required,oneof=include exclude" json:"rule"`
 }
 
@@ -388,8 +419,8 @@ func (s *Server) updateCampaignCta(ctx *gin.Context) {
 
 type updateTargetAppRequest struct {
 	Cid     string `binding:"required" json:"cid"`
-	AppID   string `binding:"required" json:"app_id"`
-	AppRule string `binding:"required,oneof=include exclude" json:"app_rule"`
+	AppID   string `binding:"required" json:"app"`
+	AppRule string `binding:"required,oneof=include exclude" json:"rule"`
 }
 
 func (s *Server) updateTargetApp(ctx *gin.Context) {
@@ -414,7 +445,7 @@ func (s *Server) updateTargetApp(ctx *gin.Context) {
 type updateTargetCountryRequest struct {
 	Cid         string `binding:"required" json:"cid"`
 	Country     string `binding:"required" json:"country_id"`
-	CountryRule string `binding:"required,oneof=include exclude" json:"country_rule"`
+	CountryRule string `binding:"required,oneof=include exclude" json:"rule"`
 }
 
 func (s *Server) updateTargetCountry(ctx *gin.Context) {
@@ -439,7 +470,7 @@ func (s *Server) updateTargetCountry(ctx *gin.Context) {
 type updateTargetOsRequest struct {
 	Cid    string `binding:"required" json:"cid"`
 	Os     string `binding:"required" json:"os"`
-	OsRule string `binding:"required,oneof=include exclude" json:"os_rule"`
+	OsRule string `binding:"required,oneof=include exclude" json:"rule"`
 }
 
 func (s *Server) updateTargetOs(ctx *gin.Context) {

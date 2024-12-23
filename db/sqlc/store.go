@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -11,6 +12,7 @@ import (
 
 type Store interface {
 	Querier
+	Delivery(ctx context.Context, arg DeliveryParams) ([]DeliveryResult, error)
 	AddCampaign(tx context.Context, arg AddCampaignParams) (AddCampaignResult, error)
 	ReadCampaign(ctx context.Context, cid string) (CompleteCampaign, error)
 	ToggleStatus(ctx context.Context, cid string) error
@@ -50,6 +52,99 @@ func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) erro
 	}
 
 	return tx.Commit(ctx)
+}
+
+func csvToSlice(csv string) []string {
+	list := strings.Split(csv, ",")
+	for i, item := range list {
+		list[i] = strings.TrimSpace(item)
+	}
+	return list
+}
+
+func contains(slice []string, str string) bool {
+	str = strings.ToLower(str)
+	for _, v := range slice {
+		if strings.ToLower(v) == str {
+			return true
+		}
+	}
+	return false
+}
+
+func shouldInclude(csv string, arg string, rule string) bool {
+	list := csvToSlice(csv)
+	contains := contains(list, arg)
+
+	if (rule == "include" && !contains) || (rule == "exclude" && contains) {
+		return false
+	}
+	return true
+}
+
+type DeliveryParams struct {
+	AppID   string `json:"app_id"`
+	Country string `json:"country"`
+	Os      string `json:"os"`
+}
+
+type DeliveryResult struct {
+	Cid string `json:"cid"`
+	Img string `json:"img"`
+	Cta string `json:"cta"`
+}
+
+func (store *SQLStore) Delivery(ctx context.Context, arg DeliveryParams) ([]DeliveryResult, error) {
+	var campaigns []Campaign
+	var result []DeliveryResult
+	active_campaigns, err := store.ListAllActiveCampaign(ctx)
+	if err != nil {
+		return []DeliveryResult{}, err
+	}
+
+	for _, campaign := range active_campaigns {
+		target_app, err := store.GetTargetApp(ctx, campaign.Cid)
+		if err != nil && err != pgx.ErrNoRows {
+			return []DeliveryResult{}, err
+		}
+		if err != pgx.ErrNoRows {
+			if !shouldInclude(target_app.AppID, arg.AppID, string(target_app.Rule)) {
+				continue
+			}
+		}
+
+		target_country, err := store.GetTargetCountry(ctx, campaign.Cid)
+		if err != nil && err != pgx.ErrNoRows {
+			return []DeliveryResult{}, err
+		}
+		if err != pgx.ErrNoRows {
+			if !shouldInclude(target_country.Country, arg.Country, string(target_country.Rule)) {
+				continue
+			}
+		}
+
+		target_os, err := store.GetTargetOs(ctx, campaign.Cid)
+		if err != nil && err != pgx.ErrNoRows {
+			return []DeliveryResult{}, err
+		}
+		if err != pgx.ErrNoRows {
+			if !shouldInclude(target_os.Os, arg.Os, string(target_os.Rule)) {
+				continue
+			}
+		}
+
+		campaigns = append(campaigns, campaign)
+	}
+
+	for _, campaign := range campaigns {
+		result = append(result, DeliveryResult{
+			Cid: campaign.Cid,
+			Img: campaign.Img,
+			Cta: campaign.Cta,
+		})
+	}
+
+	return result, nil
 }
 
 type AddCampaignParams struct {

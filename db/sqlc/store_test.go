@@ -9,6 +9,133 @@ import (
 	"github.com/vivek-344/AdRouter/util"
 )
 
+func TestDelivery(t *testing.T) {
+	store := db.NewStore(testDB)
+
+	campaigns := make([]db.Campaign, 3)
+
+	campaigns[0] = createRandomCampaign(t)
+	arg1 := db.CreateTargetAppParams{
+		Cid:   campaigns[0].Cid,
+		AppID: "app1,app2,app3",
+		Rule:  "include",
+	}
+	_, err := store.CreateTargetApp(context.Background(), arg1)
+	require.NoError(t, err)
+
+	campaigns[1] = createRandomCampaign(t)
+	arg2 := db.CreateTargetCountryParams{
+		Cid:     campaigns[1].Cid,
+		Country: "US,UK,CA",
+		Rule:    "exclude",
+	}
+	_, err = store.CreateTargetCountry(context.Background(), arg2)
+	require.NoError(t, err)
+
+	campaigns[2] = createRandomCampaign(t)
+	arg3 := db.CreateTargetOsParams{
+		Cid:  campaigns[2].Cid,
+		Os:   "android,ios",
+		Rule: "include",
+	}
+	_, err = store.CreateTargetOs(context.Background(), arg3)
+	require.NoError(t, err)
+
+	testCases := []struct {
+		name         string
+		deliveryArgs db.DeliveryParams
+		checkResults func(t *testing.T, results []db.DeliveryResult)
+	}{
+		{
+			name: "Match app inclusion rule",
+			deliveryArgs: db.DeliveryParams{
+				AppID:   "app1",
+				Country: "IN",
+				Os:      "android",
+			},
+			checkResults: func(t *testing.T, results []db.DeliveryResult) {
+				require.Contains(t, extractCids(results), campaigns[0].Cid)
+			},
+		},
+		{
+			name: "No match for app inclusion rule",
+			deliveryArgs: db.DeliveryParams{
+				AppID:   "app4",
+				Country: "IN",
+				Os:      "android",
+			},
+			checkResults: func(t *testing.T, results []db.DeliveryResult) {
+				require.NotContains(t, extractCids(results), campaigns[0].Cid)
+			},
+		},
+		{
+			name: "Match country exclusion rule",
+			deliveryArgs: db.DeliveryParams{
+				AppID:   "app1",
+				Country: "IN",
+				Os:      "android",
+			},
+			checkResults: func(t *testing.T, results []db.DeliveryResult) {
+				require.Contains(t, extractCids(results), campaigns[1].Cid)
+			},
+		},
+		{
+			name: "No match for country exclusion rule",
+			deliveryArgs: db.DeliveryParams{
+				AppID:   "app1",
+				Country: "US",
+				Os:      "android",
+			},
+			checkResults: func(t *testing.T, results []db.DeliveryResult) {
+				require.NotContains(t, extractCids(results), campaigns[1].Cid)
+			},
+		},
+		{
+			name: "Match OS inclusion rule",
+			deliveryArgs: db.DeliveryParams{
+				AppID:   "app1",
+				Country: "IN",
+				Os:      "android",
+			},
+			checkResults: func(t *testing.T, results []db.DeliveryResult) {
+				require.Contains(t, extractCids(results), campaigns[2].Cid)
+			},
+		},
+		{
+			name: "No match for OS inclusion rule",
+			deliveryArgs: db.DeliveryParams{
+				AppID:   "app1",
+				Country: "IN",
+				Os:      "windows",
+			},
+			checkResults: func(t *testing.T, results []db.DeliveryResult) {
+				require.NotContains(t, extractCids(results), campaigns[2].Cid)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			results, err := store.Delivery(context.Background(), tc.deliveryArgs)
+			require.NoError(t, err)
+			tc.checkResults(t, results)
+		})
+	}
+
+	for _, campaign := range campaigns {
+		err := store.DeleteCampaign(context.Background(), campaign.Cid)
+		require.NoError(t, err)
+	}
+}
+
+func extractCids(results []db.DeliveryResult) []string {
+	cids := make([]string, len(results))
+	for i, result := range results {
+		cids[i] = result.Cid
+	}
+	return cids
+}
+
 func createRandomCampaign(t *testing.T) db.Campaign {
 	arg := db.CreateCampaignParams{
 		Cid:  util.RandomCid(),
