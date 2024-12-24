@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres17
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - adrouter
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    env_file:
+      - app.env
+
+  redis:
+    image: redis:latest
+    container_name: redis7
+    ports:
+      - "6379:6379"
+    networks:
+      - adrouter
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    env_file:
+      - app.env
+
+  api:
+    build:
+      dockerfile: Dockerfile
+    container_name: adrouter
+    ports:
+      - "8080:8080"
+    networks:
+      - adrouter
+    environment:
+      - GIN_MODE=release
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - app.env
+
+networks:
+  adrouter:
+    name: adrouter
+    external: true
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -10,10 +10,10 @@ redis:
 	docker run --network adrouter --name redis7 -p 6379:6379 -d redis
 
 createdb:
-	docker exec -it postgres17 createdb --username=${POSTGRES_USER} --owner=${POSTGRES_USER} ad_router
+	docker exec -it postgres17 createdb --username=${POSTGRES_USER} --owner=${POSTGRES_USER} ${POSTGRES_DB}
 
 dropdb:
-	docker exec -it postgres17 dropdb ad_router
+	docker exec -it postgres17 dropdb ${POSTGRES_DB}
 
 migrateup:
 	migrate -path db/migration -database ${DB_SOURCE} -verbose up
@@ -30,5 +30,11 @@ test:
 server:
 	go run main.go
 
+composeup:
+	docker compose up --attach api
 
-.PHONY: network postgres redis createdb dropdb migrateup migratedown sqlc test server
+composedown:
+	docker compose down
+
+
+.PHONY: network postgres redis createdb dropdb migrateup migratedown sqlc test server composeup composedown
