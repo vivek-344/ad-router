@@ -6,8 +6,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - adrouter
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -21,8 +19,6 @@ services:
     container_name: redis7
     ports:
       - "6379:6379"
-    networks:
-      - adrouter
     volumes:
       - redis_data:/data
     healthcheck:
@@ -33,14 +29,22 @@ services:
     env_file:
       - app.env
 
+  migrate:
+    build:
+      dockerfile: Dockerfile.migrate
+    container_name: adrouter-migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - app.env
+
   api:
     build:
       dockerfile: Dockerfile
     container_name: adrouter
     ports:
       - "8080:8080"
-    networks:
-      - adrouter
     environment:
       - GIN_MODE=release
     depends_on:
@@ -48,13 +52,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     env_file:
       - app.env
-
-networks:
-  adrouter:
-    name: adrouter
-    external: true
 
 volumes:
   postgres_data:
