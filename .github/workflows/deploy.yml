@@ -37,7 +37,6 @@ jobs:
           echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> app.env
           echo "SERVER_ADDRESS=${{ secrets.SERVER_ADDRESS }}" >> app.env
           echo "REDIS_SOURCE=${{ secrets.REDIS_SOURCE }}" >> app.env
-          cat app.env
 
       - name: "Build main image"
         run: |
