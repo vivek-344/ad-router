@@ -1,0 +1,56 @@
+name: run tests
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-push-artifact:
+    environment: production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+
+      - name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v2"
+        with:
+          credentials_json: "${{ secrets.SERVICE_ACCOUNT_KEY }}"
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v2"
+
+      - name: "Use gcloud CLI"
+        run: "gcloud info"
+
+      - name: "Docker auth"
+        run: |
+          gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev --quiet
+
+      - name: "Write secrets to app.env file"
+        run: |
+          echo ${{ vars.CHECK1 }}
+          echo ${{ vars.CHECK2 }}
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> app.env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> app.env
+          echo "DB_SOURCE=${{ secrets.DB_SOURCE }}" >> app.env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> app.env
+          echo "SERVER_ADDRESS=${{ secrets.SERVER_ADDRESS }}" >> app.env
+          echo "REDIS_SOURCE=${{ secrets.REDIS_SOURCE }}" >> app.env
+
+      - name: "Build main image"
+        run: |
+          docker build . --file Dockerfile --tag ${{ vars.GAR_LOCATION }}/adrouter:latest
+
+      - name: "Push main image"
+        run: |
+          docker push ${{ vars.GAR_LOCATION }}/adrouter:latest
+
+      - name: "Build Migrate image"
+        run: |
+          docker build . --file Dockerfile.migrate --tag ${{ vars.GAR_LOCATION }}/migrate:latest
+
+      - name: "Push Migrate image"
+        run: |
+          docker push ${{ vars.GAR_LOCATION }}/migrate:latest
