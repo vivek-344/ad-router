@@ -5,11 +5,9 @@ import (
 )
 
 type Config struct {
-	DBSource         string `mapstructure:"DB_SOURCE"`
-	RedisSource      string `mapstructure:"REDIS_SOURCE"`
-	ServerAddress    string `mapstructure:"SERVER_ADDRESS"`
-	PostgresPassword string `mapstructure:"POSTGRES_PASSWORD"`
-	PostgresUser     string `mapstructure:"POSTGRES_USER"`
+	DBSource      string `mapstructure:"DB_SOURCE"`
+	RedisSource   string `mapstructure:"REDIS_SOURCE"`
+	ServerAddress string `mapstructure:"SERVER_ADDRESS"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

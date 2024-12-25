@@ -14,6 +14,4 @@ func TestLoadConfig(t *testing.T) {
 	require.NotEmpty(t, config.DBSource)
 	require.NotEmpty(t, config.RedisSource)
 	require.NotEmpty(t, config.ServerAddress)
-	require.NotEmpty(t, config.PostgresPassword)
-	require.NotEmpty(t, config.PostgresUser)
 }
