@@ -1,9 +1,8 @@
-name: deployment
+name: run tests
 
 on:
   push:
-    branches:
-      - "main"
+    branches: [ "main" ]
 
 jobs:
   build-push-artifact:
