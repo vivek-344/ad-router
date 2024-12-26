@@ -106,7 +106,7 @@ AdRouter is a RESTful API built with Go (Gin framework) that allows users to cre
 1. Clone the repository:
     
     ```bash
-    git clone https://github.com/<your-repo>/AdRouter.git
+    git clone https://github.com/vivek-344/AdRouter.git
     cd AdRouter
     ```
     
