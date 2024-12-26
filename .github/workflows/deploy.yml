@@ -52,6 +52,12 @@ jobs:
         run: |
           docker push ${{ vars.GAR_LOCATION }}/adrouter:latest
           docker push ${{ vars.GAR_LOCATION }}/adrouter:${{ env.IMAGE_TAG }}
+
+      - name: "Set up kubectl"
+        uses: "google-github-actions/get-gke-credentials@v2"
+        with:
+          cluster_name: "${{ vars.GKE_CLUSTER }}"
+          location: "${{ vars.GCP_REGION }}"
       
       - name: Deploy main application
         run: |
@@ -59,20 +65,14 @@ jobs:
 
       - name: "Build Migrate image"
         run: |
-          docker build . --file Dockerfile.migrate --tag ${{ vars.GAR_LOCATION }}/migrate:latest
+          docker build . --file Dockerfile.migrate --tag ${{ vars.GAR_LOCATION }}/migrate:${{ env.IMAGE_TAG }}
 
       - name: "Push Migrate image"
         run: |
-          docker push ${{ vars.GAR_LOCATION }}/migrate:latest
-
-      - name: "Set up kubectl"
-        uses: "google-github-actions/get-gke-credentials@v2"
-        with:
-          cluster_name: "${{ vars.GKE_CLUSTER }}"
-          location: "${{ vars.GCP_REGION }}"
+          docker push ${{ vars.GAR_LOCATION }}/migrate:${{ env.IMAGE_TAG }}
 
       - name: "Run database migrations"
         run: |
           MIGRATION_JOB="migration-$(date +%s)"
           echo "MIGRATION_JOB=$MIGRATION_JOB" >> $GITHUB_ENV
-          kubectl create job $MIGRATION_JOB --image=${{ vars.GAR_LOCATION }}/migrate:latest
+          kubectl create job $MIGRATION_JOB --image=${{ vars.GAR_LOCATION }}/migrate:${{ env.IMAGE_TAG }}
