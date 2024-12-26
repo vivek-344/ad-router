@@ -125,7 +125,7 @@ AdRouter is a RESTful API built with Go (Gin framework) that allows users to cre
 3.  Start the application:
     
     ```bash
-    docker compose up
+    docker compose --env-file app.env up
     ```
 
 
