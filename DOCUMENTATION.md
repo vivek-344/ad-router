@@ -7,7 +7,7 @@ The AdRouter API enables users to manage and deliver ad campaigns through a REST
 The API is hosted at:
 
 ```
-https://adrouter.live
+https://adrouter.site
 ```
 
 ---
