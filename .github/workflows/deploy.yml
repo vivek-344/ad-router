@@ -1,4 +1,4 @@
-name: build and push docker image to artifact
+name: build and deploy
 
 on:
   push:
@@ -53,3 +53,22 @@ jobs:
       - name: "Push Migrate image"
         run: |
           docker push ${{ vars.GAR_LOCATION }}/migrate:latest
+
+      - name: "Set up kubectl"
+        uses: "google-github-actions/get-gke-credentials@v2"
+        with:
+          cluster_name: "${{ vars.GKE_CLUSTER }}"
+          location: "${{ vars.GCP_REGION }}"
+
+      - name: "Run database migrations"
+        run: |
+          MIGRATION_JOB="migration-$(date +%s)"
+          echo "MIGRATION_JOB=$MIGRATION_JOB" >> $GITHUB_ENV
+          kubectl create job $MIGRATION_JOB --image=${{ vars.GAR_LOCATION }}/migrate:latest
+          kubectl wait --for=condition=complete job/$MIGRATION_JOB --timeout=60s
+
+      - name: "Deploy main application"
+        run: |
+          kubectl get deployment adrouter-server && \
+          kubectl set image deployment/adrouter-server adrouter=${{ vars.GAR_LOCATION }}/adrouter:latest || \
+          kubectl create deployment adrouter-server --image=${{ vars.GAR_LOCATION }}/adrouter:latest
