@@ -1,0 +1,292 @@
+<html><head><style>body {
+   color: black;
+}
+</style></head><body><h1 id="adrouter-api-documentation">AdRouter API Documentation</h1>
+<p>The AdRouter API enables users to manage and deliver ad campaigns through a RESTful interface. The API supports CRUD operations on campaigns, as well as targeting and delivery features. Each endpoint is detailed below with input and output specifications.</p>
+<h2 id="base-url">Base URL</h2>
+<p>The API is hosted at:</p>
+<pre><code><span class="hljs-symbol">https:</span><span class="hljs-comment">//adrouter.live</span>
+</code></pre><hr>
+<h2 id="endpoints">Endpoints</h2>
+<h3 id="1-health-check-">1. <strong>Health Check</strong></h3>
+<h4 id="-get-ping-"><code>GET /ping</code></h4>
+<p>Checks the API server&#39;s health and latency.</p>
+<p><strong>Response:</strong></p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"ping"</span>: <span class="hljs-string">"&lt;time-elapsed&gt;"</span>
+}
+</code></pre>
+<hr>
+<h3 id="2-campaign-management-">2. <strong>Campaign Management</strong></h3>
+<h4 id="-get-v1-get_campaign-cid-"><code>GET /v1/get_campaign/:cid</code></h4>
+<p>Fetches details of a specific campaign.</p>
+<p><strong>Path Parameters:</strong></p>
+<ul>
+<li><code>cid</code>: Campaign ID (string, required)</li>
+</ul>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>200 OK</code>: Campaign details.</li>
+<li><code>404 Not Found</code>: Campaign not found.</li>
+</ul>
+<hr>
+<h4 id="-post-v1-create_campaign-"><code>POST /v1/create_campaign</code></h4>
+<p>Creates a new campaign.</p>
+<p><strong>Request Body:</strong></p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"cid"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"string (6-32 characters)"</span>,
+  <span class="hljs-attr">"img"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"cta"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"app"</span>: <span class="hljs-string">"string (optional)"</span>,
+  <span class="hljs-attr">"app_rule"</span>: <span class="hljs-string">"include | exclude (needed only if app is given)"</span>,
+  <span class="hljs-attr">"country"</span>: <span class="hljs-string">"string (optional)"</span>,
+  <span class="hljs-attr">"country_rule"</span>: <span class="hljs-string">"include | exclude (needed only if country is given)"</span>,
+  <span class="hljs-attr">"os"</span>: <span class="hljs-string">"string (optional)"</span>,
+  <span class="hljs-attr">"os_rule"</span>: <span class="hljs-string">"include | exclude (needed only if os is given)"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>201 Created</code>: Campaign created.</li>
+<li><code>400 Bad Request</code>: Validation errors.</li>
+</ul>
+<hr>
+<h4 id="-post-v1-add_campaign-"><code>POST /v1/add_campaign</code></h4>
+<p>Adds an new campaign without any rules.</p>
+<p><strong>Request Body:</strong></p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"cid"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"img"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"cta"</span>: <span class="hljs-string">"string"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>201 Created</code>: Campaign added.</li>
+<li><code>400 Bad Request</code>: Validation errors.</li>
+</ul>
+<hr>
+<h4 id="-patch-v1-toggle_status-cid-"><code>PATCH /v1/toggle_status/:cid</code></h4>
+<p>Toggles the active status of a campaign.</p>
+<p><strong>Path Parameters:</strong></p>
+<ul>
+<li><code>cid</code>: Campaign ID (string, required)</li>
+</ul>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>200 OK</code>: Status toggled successfully.</li>
+<li><code>404 Not Found</code>: Campaign not found.</li>
+</ul>
+<hr>
+<h4 id="-patch-v1-update_campaign_name-"><code>PATCH /v1/update_campaign_name</code></h4>
+<p>Updates the name of a campaign.</p>
+<p><strong>Request Body:</strong></p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"cid"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"string (6-32 characters)"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>200 OK</code>: Name updated successfully.</li>
+<li><code>400 Bad Request</code>: Validation errors.</li>
+</ul>
+<hr>
+<h4 id="-patch-v1-update_campaign_image-"><code>PATCH /v1/update_campaign_image</code></h4>
+<p>Updates the image of a campaign.</p>
+<p><strong>Request Body:</strong></p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"cid"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"img"</span>: <span class="hljs-string">"string"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>200 OK</code>: Image updated successfully.</li>
+<li><code>400 Bad Request</code>: Validation errors.</li>
+</ul>
+<hr>
+<h4 id="-patch-v1-update_campaign_cta-"><code>PATCH /v1/update_campaign_cta</code></h4>
+<p>Updates the call-to-action (CTA) of a campaign.</p>
+<p><strong>Request Body:</strong></p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"cid"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"cta"</span>: <span class="hljs-string">"string"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>200 OK</code>: CTA updated successfully.</li>
+<li><code>400 Bad Request</code>: Validation errors.</li>
+</ul>
+<hr>
+<h3 id="3-targeting-management-">3. <strong>Targeting Management</strong></h3>
+<h4 id="-post-v1-add_target_app-"><code>POST /v1/add_target_app</code></h4>
+<p>Adds targeting by application ID.</p>
+<p><strong>Request Body:</strong></p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"cid"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"app"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"rule"</span>: <span class="hljs-string">"include | exclude"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>201 Created</code>: Target app added successfully.</li>
+<li><code>400 Bad Request</code>: Validation errors.</li>
+</ul>
+<hr>
+<h4 id="-post-v1-add_target_country-"><code>POST /v1/add_target_country</code></h4>
+<p>Adds targeting by country.</p>
+<p><strong>Request Body:</strong></p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"cid"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"country"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"rule"</span>: <span class="hljs-string">"include | exclude"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>201 Created</code>: Target country added successfully.</li>
+<li><code>400 Bad Request</code>: Validation errors.</li>
+</ul>
+<hr>
+<h4 id="-post-v1-add_target_os-"><code>POST /v1/add_target_os</code></h4>
+<p>Adds targeting by operating system.</p>
+<p><strong>Request Body:</strong></p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"cid"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"os"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"rule"</span>: <span class="hljs-string">"include | exclude"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>201 Created</code>: Target OS added successfully.</li>
+<li><code>400 Bad Request</code>: Validation errors.</li>
+</ul>
+<hr>
+<h4 id="-patch-v1-update_target_app-"><code>PATCH /v1/update_target_app</code></h4>
+<p>Updates targeting by application ID.</p>
+<p><strong>Request Body:</strong></p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"cid"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"app"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"rule"</span>: <span class="hljs-string">"include | exclude"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>200 OK</code>: Target app updated successfully.</li>
+<li><code>400 Bad Request</code>: Validation errors.</li>
+</ul>
+<hr>
+<h4 id="-patch-v1-update_target_country-"><code>PATCH /v1/update_target_country</code></h4>
+<p>Updates targeting by country.</p>
+<p><strong>Request Body:</strong></p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"cid"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"country"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"rule"</span>: <span class="hljs-string">"include | exclude"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>200 OK</code>: Target country updated successfully.</li>
+<li><code>400 Bad Request</code>: Validation errors.</li>
+</ul>
+<hr>
+<h4 id="-patch-v1-update_target_os-"><code>PATCH /v1/update_target_os</code></h4>
+<p>Updates targeting by operating system.</p>
+<p><strong>Request Body:</strong></p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"cid"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"os"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"rule"</span>: <span class="hljs-string">"include | exclude"</span>
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>200 OK</code>: Target OS updated successfully.</li>
+<li><code>400 Bad Request</code>: Validation errors.</li>
+</ul>
+<hr>
+<h3 id="4-delivery-">4. <strong>Delivery</strong></h3>
+<h4 id="-get-v1-delivery-"><code>GET /v1/delivery</code></h4>
+<p>Fetches available campaigns based on targeting criteria.</p>
+<p><strong>Query Parameters:</strong></p>
+<ul>
+<li><code>app</code>: Application ID (string, required)</li>
+<li><code>country</code>: Country (string, required)</li>
+<li><code>os</code>: Operating System (string, required)</li>
+</ul>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>200 OK</code>: List of campaigns matching the criteria.</li>
+<li><code>204 No Content</code>: No campaigns available.</li>
+</ul>
+<hr>
+<h3 id="5-deletion-">5. <strong>Deletion</strong></h3>
+<h4 id="-delete-v1-delete_campaign-cid-"><code>DELETE /v1/delete_campaign/:cid</code></h4>
+<p>Deletes a campaign by ID.</p>
+<p><strong>Path Parameters:</strong></p>
+<ul>
+<li><code>cid</code>: Campaign ID (string, required)</li>
+</ul>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>200 OK</code>: Campaign deleted successfully.</li>
+<li><code>404 Not Found</code>: Campaign not found.</li>
+</ul>
+<hr>
+<h4 id="-delete-v1-delete_target_app-cid-"><code>DELETE /v1/delete_target_app/:cid</code></h4>
+<p>Deletes a target app from a campaign.</p>
+<p><strong>Path Parameters:</strong></p>
+<ul>
+<li><code>cid</code>: Campaign ID (string, required)</li>
+</ul>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>200 OK</code>: Target app deleted successfully.</li>
+<li><code>404 Not Found</code>: Resource not found.</li>
+</ul>
+<hr>
+<h4 id="-delete-v1-delete_target_country-cid-"><code>DELETE /v1/delete_target_country/:cid</code></h4>
+<p>Deletes a target country from a campaign.</p>
+<p><strong>Path Parameters:</strong></p>
+<ul>
+<li><code>cid</code>: Campaign ID (string, required)</li>
+</ul>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>200 OK</code>: Target country deleted successfully.</li>
+<li><code>404 Not Found</code>: Resource not found.</li>
+</ul>
+<hr>
+<h4 id="-delete-v1-delete_target_os-cid-"><code>DELETE /v1/delete_target_os/:cid</code></h4>
+<p>Deletes a target OS from a campaign.</p>
+<p><strong>Path Parameters:</strong></p>
+<ul>
+<li><code>cid</code>: Campaign ID (string, required)</li>
+</ul>
+<p><strong>Response:</strong></p>
+<ul>
+<li><code>200 OK</code>: Target OS deleted successfully.</li>
+<li><code>404 Not Found</code>: Resource not found.</li>
+</ul>
+<hr>
+<h3 id="6-error-handling-">6. <strong>Error Handling</strong></h3>
+<p>All error responses include the following format:</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"error"</span>: <span class="hljs-string">"&lt;error-message&gt;"</span>
+}
+</code></pre>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>All endpoints return responses in JSON format.</li>
+<li>Use appropriate HTTP methods (GET, POST, PATCH, DELETE) to interact with the API.</li>
+<li>Ensure valid inputs to avoid <code>400 Bad Request</code> errors.</li>
+</ul>
+</body></html>

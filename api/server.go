@@ -21,6 +21,11 @@ func NewServer(store db.Store) *Server {
 	server := &Server{store: store}
 	router := gin.Default()
 
+	router.LoadHTMLGlob("templates/*")
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
+	})
+
 	router.GET("/ping", func(c *gin.Context) {
 		start := time.Now()
 		c.JSON(http.StatusOK, gin.H{
