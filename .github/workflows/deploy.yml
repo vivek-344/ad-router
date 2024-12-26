@@ -38,13 +38,24 @@ jobs:
           echo "SERVER_ADDRESS=${{ secrets.SERVER_ADDRESS }}" >> app.env
           echo "REDIS_SOURCE=${{ secrets.REDIS_SOURCE }}" >> app.env
 
-      - name: "Build main image"
+      - name: Set image tag
         run: |
-          docker build . --file Dockerfile --tag ${{ vars.GAR_LOCATION }}/adrouter:latest
-
-      - name: "Push main image"
+          echo "IMAGE_TAG=$(date +%s)" >> $GITHUB_ENV
+      
+      - name: Build main image
+        run: |
+          docker build . --file Dockerfile \
+            --tag ${{ vars.GAR_LOCATION }}/adrouter:latest \
+            --tag ${{ vars.GAR_LOCATION }}/adrouter:${{ env.IMAGE_TAG }}
+      
+      - name: Push main image
         run: |
           docker push ${{ vars.GAR_LOCATION }}/adrouter:latest
+          docker push ${{ vars.GAR_LOCATION }}/adrouter:${{ env.IMAGE_TAG }}
+      
+      - name: Deploy main application
+        run: |
+          kubectl set image deployment/adrouter-server adrouter=${{ vars.GAR_LOCATION }}/adrouter:${{ env.IMAGE_TAG }}
 
       - name: "Build Migrate image"
         run: |
@@ -65,9 +76,3 @@ jobs:
           MIGRATION_JOB="migration-$(date +%s)"
           echo "MIGRATION_JOB=$MIGRATION_JOB" >> $GITHUB_ENV
           kubectl create job $MIGRATION_JOB --image=${{ vars.GAR_LOCATION }}/migrate:latest
-
-      - name: "Deploy main application"
-        run: |
-          kubectl get deployment adrouter-server && \
-          kubectl set image deployment/adrouter-server adrouter=${{ vars.GAR_LOCATION }}/adrouter:latest || \
-          kubectl create deployment adrouter-server --image=${{ vars.GAR_LOCATION }}/adrouter:latest
