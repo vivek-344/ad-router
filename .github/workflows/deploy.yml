@@ -76,5 +76,5 @@ jobs:
           MIGRATION_JOB="migration-$(date +%s)"
           echo "MIGRATION_JOB=$MIGRATION_JOB" >> $GITHUB_ENV
           kubectl create job $MIGRATION_JOB --image=${{ vars.GAR_LOCATION }}/migrate:${{ env.IMAGE_TAG }}
-          kubectl wait --for=condition=complete job/$MIGRATION_JOB
+          kubectl wait --for=condition=complete job/$MIGRATION_JOB  --timeout=600s
           kubectl delete job $MIGRATION_JOB
