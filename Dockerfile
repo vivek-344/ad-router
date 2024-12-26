@@ -10,6 +10,7 @@ WORKDIR /app
 RUN apk add --no-cache bash
 COPY --from=builder /app/main .
 COPY app.env .
+COPY templates/ /app/templates/
 COPY start.sh .
 
 EXPOSE 8080
