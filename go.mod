@@ -4,6 +4,7 @@ go 1.23.4
 
 require (
 	github.com/jackc/pgx/v5 v5.7.1
+	github.com/redis/go-redis/v9 v9.7.0
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 )
@@ -27,7 +28,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/redis/go-redis/v9 v9.7.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	golang.org/x/arch v0.8.0 // indirect
